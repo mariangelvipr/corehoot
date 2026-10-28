@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CoreHoot</title>
+<meta name="description" content="CoreHoot: conócete, entiende cómo amas y construye mejores relaciones. Quizzes interactivos sobre relaciones afectivas para jóvenes. Proyecto Core II, Universidad de La Sabana.">
+<meta property="og:title" content="CoreHoot!">
+<meta property="og:description" content="Conócete. Reflexiona. Ama mejor. Seis módulos interactivos sobre relaciones afectivas.">
+<meta name="theme-color" content="#120a29">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect x='20' y='20' width='80' height='90' rx='38' fill='%237b55e0'/%3E%3Ccircle cx='44' cy='50' r='15' fill='white'/%3E%3Ccircle cx='76' cy='50' r='15' fill='white'/%3E%3Ccircle cx='44' cy='52' r='7' fill='%231b1033'/%3E%3Ccircle cx='76' cy='52' r='7' fill='%231b1033'/%3E%3Cpath d='M55 64h10l-5 9z' fill='%23ffd166'/%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800;900&display=swap">
+<style>
+/* Layout: a night-sky "game show" — one centered stage over a drifting starfield; Kahoot-style answer tiles; modules are stars in a constellation. Single dark world by design (CoreHoot brand). */
+:root{
+  color-scheme: dark;
+  --bg:#120a29; --bg2:#1c1040; --panel:rgba(255,255,255,.06); --panel2:rgba(255,255,255,.1);
+  --line:rgba(226,214,255,.16); --fg:#f6f1ff; --muted:#bfb2e0; --dim:#8f82b5;
+  --red:#e21b3c; --blue:#1368ce; --yellow:#e2a400; --green:#26890c; --violet:#8a5cff; --teal:#0d9aa8;
+  --gold:#ffd166; --ok:#3ccf6e; --warn:#ff8a3d; --ink:#1b1033;
+  --display:"Lilita One","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,-apple-system,sans-serif;
+  --r:14px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.glow{position:fixed;inset:-20% -10% auto -10%;height:80vh;z-index:0;pointer-events:none;background:radial-gradient(60% 60% at 30% 30%,rgba(138,92,255,.28),transparent 70%),radial-gradient(50% 50% at 80% 20%,rgba(19,104,206,.18),transparent 70%)}
+.shell{position:relative;z-index:1;min-height:100%;display:flex;flex-direction:column}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(18,10,41,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topin{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:12px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));flex-wrap:wrap}
+.logo{font-family:var(--display);font-size:28px;letter-spacing:.5px;color:var(--fg);text-decoration:none;line-height:1;display:flex;align-items:center;gap:8px}
+.logo b{color:var(--gold);font-weight:400}
+nav.main{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav.main a{color:var(--muted);text-decoration:none;font-weight:800;font-size:14px;padding:8px 12px;border-radius:999px}
+nav.main a:hover{color:var(--fg);background:var(--panel)}
+nav.main a[aria-current="page"]{color:var(--ink);background:var(--fg)}
+.pts{font-weight:900;font-size:14px;color:var(--gold);padding:6px 10px;border:1px solid rgba(255,209,102,.35);border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.iconbtn{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:999px;width:36px;height:36px;display:grid;place-items:center;cursor:pointer}
+.iconbtn:hover{background:var(--panel2)}
+main{flex:1;width:100%;max-width:1040px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+footer.foot{position:relative;z-index:1;border-top:1px solid var(--line);color:var(--dim);font-size:13px}
+footer .in{max-width:1040px;margin:0 auto;padding-block:18px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between}
+h1,h2,h3{font-family:var(--display);font-weight:400;letter-spacing:.3px;line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(34px,6vw,58px)}
+h2{font-size:clamp(26px,4vw,36px)}
+h3{font-size:22px}
+p{margin:0}
+.lead{font-size:18px;color:var(--muted);max-width:60ch}
+.eyebrow{font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:760px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.grid2,.grid3{grid-template-columns:minmax(0,1fr)}}
+.stack>*,.grid2>*,.grid3>*,.grid4>*{min-width:0}
+.tablewrap{max-width:100%}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0}
+.btn{font-family:var(--body);font-weight:900;font-size:16px;border:0;border-radius:12px;padding:13px 22px;cursor:pointer;color:var(--ink);background:var(--fg);box-shadow:0 4px 0 rgba(0,0,0,.35);transition:transform .08s ease, box-shadow .08s ease;text-decoration:none;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.btn.gold{background:var(--gold)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line);box-shadow:none}
+.btn.small{font-size:14px;padding:9px 14px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input[type=text],textarea{width:100%;font-family:var(--body);font-size:16px;color:var(--fg);background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+textarea{min-height:120px;resize:vertical;line-height:1.5}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+.muted{color:var(--muted)}
+.dim{color:var(--dim)}
+.small{font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--panel2);color:var(--muted);white-space:nowrap}
+.src{font-size:12px;color:var(--dim);font-style:italic}
+
+/* Owl */
+.owl{width:84px;height:84px;flex:none}
+.owl .lid{transform-origin:center;animation:blink 5s infinite}
+.owl.bob{animation:bob 3.2s ease-in-out infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(0)}96%{transform:scaleY(1)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.speech{position:relative;background:var(--fg);color:var(--ink);border-radius:16px;padding:12px 16px;font-weight:700;max-width:52ch}
+.speech::before{content:"";position:absolute;left:-8px;top:22px;border:8px solid transparent;border-left:0;border-right-color:var(--fg)}
+.hoot{display:flex;gap:12px;align-items:flex-start}
+
+/* Lobby */
+.lobby{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:860px){.lobby{grid-template-columns:minmax(0,1fr)}}
+.wordmark{font-family:var(--display);font-size:clamp(56px,11vw,112px);line-height:.9;letter-spacing:1px;text-shadow:0 6px 0 rgba(0,0,0,.35)}
+.wordmark b{color:var(--gold);font-weight:400}
+.pin{background:var(--fg);color:var(--ink);border-radius:18px;padding:22px;box-shadow:0 10px 0 rgba(0,0,0,.35)}
+.pin h3{color:var(--ink)}
+.pin input[type=text]{background:#fff;color:var(--ink);border:2px solid #d9d0f0;font-weight:800;font-size:18px;text-align:center}
+.pin input::placeholder{color:#9b90b8}
+.opt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opt button{font-family:var(--body);font-weight:800;font-size:14px;border:2px solid #d9d0f0;background:#fff;color:var(--ink);border-radius:12px;padding:10px;cursor:pointer;text-align:left}
+.opt button[aria-pressed="true"]{border-color:var(--violet);background:#efe8ff}
+.cycle{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.cycle span{padding:6px 10px;border-radius:8px;color:#fff}
+.cycle i{font-style:normal;color:var(--dim)}
+
+/* Map */
+.mapwrap{position:relative;background:radial-gradient(80% 80% at 50% 40%,rgba(138,92,255,.18),transparent 70%);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.mapwrap>svg{display:block;width:100%;height:auto}
+.mapwrap .star{cursor:pointer}
+.mapwrap .star:focus-visible{outline:none}
+.mapwrap .star:focus-visible circle.halo{stroke:var(--gold);stroke-width:3}
+.modcard{display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--fg);position:relative;overflow:hidden;transition:transform .12s ease}
+.modcard:hover{transform:translateY(-3px)}
+.modcard .band{height:6px;border-radius:6px}
+.modcard .top{display:flex;align-items:center;gap:10px}
+.done-pill{font-size:12px;font-weight:900;color:var(--ink);background:var(--gold);padding:3px 9px;border-radius:999px}
+.shape{width:30px;height:30px;flex:none}
+
+/* Quiz */
+.stage{display:flex;flex-direction:column;gap:18px}
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bar{height:8px;background:var(--panel2);border-radius:999px;overflow:hidden;flex:1;min-width:120px}
+.bar>i{display:block;height:100%;background:var(--gold);border-radius:999px;transition:width .4s ease}
+.qcard{background:var(--fg);color:var(--ink);border-radius:18px;padding:clamp(18px,4vw,30px);box-shadow:0 8px 0 rgba(0,0,0,.35);text-align:center}
+.qcard .qk{font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#6b5aa0;margin-bottom:6px}
+.qcard .qt{font-family:var(--display);font-size:clamp(22px,3.6vw,32px);line-height:1.15;text-wrap:balance}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tiles.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tiles.n5{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:560px){.tiles,.tiles.n3,.tiles.n5{grid-template-columns:minmax(0,1fr)}}
+.tile{position:relative;display:flex;align-items:center;gap:14px;text-align:left;min-height:84px;border:0;border-radius:14px;padding:16px 18px;color:#fff;font-family:var(--body);font-size:17px;font-weight:800;line-height:1.3;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.35);transition:transform .1s ease,opacity .3s ease,filter .3s ease}
+.tile:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.tile:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.tile svg{width:30px;height:30px;flex:none}
+.tile.c0{background:var(--red)} .tile.c1{background:var(--blue)} .tile.c2{background:var(--yellow);color:#2a1700} .tile.c3{background:var(--green)} .tile.c4{background:var(--violet)}
+.tile.cg{background:var(--green)} .tile.cy{background:var(--yellow);color:#2a1700} .tile.cr{background:var(--red)}
+.tiles.answered .tile{cursor:default;pointer-events:none}
+.tiles.answered .tile:not(.picked){opacity:.28;filter:saturate(.4)}
+.tile.picked{transform:scale(1.02);box-shadow:0 0 0 4px var(--fg),0 5px 0 rgba(0,0,0,.35)}
+.tile .mark{margin-left:auto;font-family:var(--display);font-size:22px}
+.tiles.answered .tile.right{opacity:1;filter:none}
+.reveal{border-radius:16px;padding:18px 20px;display:flex;gap:14px;align-items:flex-start;animation:pop .35s ease}
+.reveal.good{background:rgba(60,207,110,.14);border:1px solid rgba(60,207,110,.5)}
+.reveal.bad{background:rgba(255,138,61,.12);border:1px solid rgba(255,138,61,.5)}
+.reveal.info{background:var(--panel);border:1px solid var(--line)}
+.reveal h3{font-size:20px;margin-bottom:4px}
+@keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:scale(1);opacity:1}}
+.order-slots{display:flex;flex-direction:column;gap:8px}
+.slot{display:flex;align-items:center;gap:12px;min-height:52px;border:2px dashed var(--line);border-radius:12px;padding:8px 14px;font-weight:800}
+.slot b{font-family:var(--display);font-size:22px;color:var(--gold);width:24px}
+.slot.filled{border-style:solid;background:var(--panel)}
+.slot.ok{border-color:var(--ok)} .slot.no{border-color:var(--warn)}
+.scale{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.scale button{width:58px;height:58px;border-radius:50%;border:0;font-family:var(--display);font-size:24px;cursor:pointer;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.scale-l{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-weight:700;max-width:360px;margin:0 auto;width:100%}
+
+/* Countdown */
+.count{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(18,10,41,.86)}
+.count b{font-family:var(--display);font-size:min(40vw,240px);color:var(--fg);animation:zoom .9s ease}
+@keyframes zoom{from{transform:scale(1.8);opacity:0}30%{opacity:1}to{transform:scale(1);opacity:1}}
+
+/* Results */
+.resulthero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0}
+.resulthero .big{font-family:var(--display);font-size:clamp(36px,7vw,64px);line-height:1;color:var(--gold);text-shadow:0 5px 0 rgba(0,0,0,.35);animation:pop .6s ease}
+.bars{display:flex;flex-direction:column;gap:12px}
+.brow{display:grid;grid-template-columns:minmax(110px,170px) minmax(0,1fr) 46px;gap:10px;align-items:center;font-weight:800;font-size:14px}
+.brow .track{height:14px;background:var(--panel2);border-radius:999px;overflow:hidden}
+.brow .track i{display:block;height:100%;border-radius:999px;width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.brow span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+@media (max-width:480px){.brow{grid-template-columns:minmax(0,1fr) 46px}.brow .track{grid-column:1/-1;order:3}}
+.kv{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.kv div{border-left:3px solid var(--gold);padding-left:12px}
+.kv dt{font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.kv dd{margin:2px 0 0;font-weight:700}
+ul.clean{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.steps span{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;background:var(--panel);color:var(--dim)}
+.steps span.on{background:var(--gold);color:var(--ink)}
+.steps span.past{color:var(--fg);background:var(--panel2)}
+.lesson{min-height:220px;display:flex;flex-direction:column;gap:12px;animation:pop .3s ease}
+.lesson .n{font-family:var(--display);font-size:16px;color:var(--gold)}
+.lesson p{font-size:17px;max-width:62ch}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--panel2)}
+.dots i.on{background:var(--gold)}
+.ai{white-space:pre-wrap;line-height:1.6}
+.badge{width:120px;height:120px;animation:spin-in .9s cubic-bezier(.2,.8,.2,1)}
+@keyframes spin-in{from{transform:rotate(-200deg) scale(.2);opacity:0}to{transform:none;opacity:1}}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--fg);color:var(--ink);font-weight:900;padding:12px 18px;border-radius:12px;box-shadow:0 6px 0 rgba(0,0,0,.35);animation:pop .3s ease;max-width:calc(100% - 32px)}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:55}
+table.ref{width:100%;border-collapse:collapse;font-size:14px}
+.tablewrap{overflow-x:auto}
+table.ref td,table.ref th{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+table.ref th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.refs p{overflow-wrap:anywhere;padding-left:2em;text-indent:-2em;font-size:15px;color:var(--muted)}
+.refs p i{color:var(--fg)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--gold);flex:none}
+.check.donec span{text-decoration:line-through;color:var(--dim)}
+.stars5{display:flex;gap:6px}
+.stars5 button{background:none;border:0;cursor:pointer;font-size:30px;color:var(--panel2);padding:0 2px;line-height:1}
+.stars5 button.on{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<canvas id="sky" aria-hidden="true"></canvas><div class="glow" aria-hidden="true"></div>
+<div class="shell">
+<header class="top"><div class="topin">
+  <a class="logo" href="#inicio" aria-label="CoreHoot, inicio">Core<b>Hoot!</b></a>
+  <nav class="main" aria-label="Principal"><a href="#inicio" data-v="inicio">Mapa</a><a href="#perfil" data-v="perfil">Mi perfil</a><a href="#proyecto" data-v="proyecto">Sobre CoreHoot</a></nav>
+  <span class="pts" id="pts" title="Puntos de autoconocimiento">✦ 0</span>
+  <button class="iconbtn" id="snd" type="button"></button>
+</div></header>
+<main id="app" aria-live="polite"></main>
+<footer class="foot"><div class="in"><span><b style="font-family:var(--display);font-weight:400;color:var(--fg)">CoreHoot!</b> · Conócete. Reflexiona. Ama mejor.</span><span>Proyecto Core II · Persona y Afectividad · Universidad de La Sabana</span></div></footer>
+</div>
+<script>
+/* ===================== CONTENIDO ===================== */
+const REFS = {
+  aristoteles:"Aristóteles. (1985). <i>Ética a Nicómaco</i> (J. Pallí Bonet, Trad.). Gredos.",
+  bauman:"Bauman, Z. (2005). <i>Amor líquido: Acerca de la fragilidad de los vínculos humanos</i>. Fondo de Cultura Económica.",
+  bowlby:"Bowlby, J. (1969). <i>Attachment and loss: Vol. 1. Attachment</i>. Basic Books.",
+  chapman:"Chapman, G. (2011). <i>Los cinco lenguajes del amor: El secreto del amor que perdura</i>. Editorial Unilit.",
+  conen:"Conen, C. (2017). <i>El amor en tu camino de vida: Diálogo con jóvenes de Grupo Sólido acerca del amor sexuado</i> (4.ª ed.). Editorial Dunken.",
+  han:"Han, B.-C. (2012). <i>La sociedad del cansancio</i> (A. Saratxaga Arregi, Trad.). Herder.",
+  illouz:"Illouz, E. (2012). <i>Por qué duele el amor: Una explicación sociológica</i>. Katz Editores.",
+  mcginnis:"McGinnis, P. J. (2020). <i>Fear of missing out: Practical decision-making in a world of overwhelming choice</i>. Sourcebooks.",
+  rojasLight:"Rojas, E. (1992). <i>El hombre light: Una vida sin valores</i>. Temas de Hoy.",
+  rojasAmigos:"Rojas, E. (2013). <i>Amigos: Adiós a la soledad</i>. Temas de Hoy.",
+  turkle:"Turkle, S. (2017). <i>En defensa de la conversación: El poder de la conversación en la era digital</i>. Ático de los Libros.",
+  waldinger:"Waldinger, R. (2015). <i>What makes a good life? Lessons from the longest study on happiness</i> [Video]. TED Conferences. https://www.ted.com/talks/robert_waldinger_what_makes_a_good_life_lessons_from_the_longest_study_on_happiness",
+  yepes:"Yepes, R., & Aranguren, J. (2003). <i>Fundamentos de antropología: Un ideal de la excelencia humana</i> (6.ª ed.). EUNSA."
+};
+
+const ATTACH = {
+  S:{name:"Apego seguro",color:"var(--green)",
+     infancia:"Suele formarse cuando hubo un cuidador disponible y sensible: se aprende que expresar necesidades tiene respuesta.",
+     hoy:"Confianza, diálogo, regulación emocional adecuada y autonomía sin miedo al abandono.",
+     clave:"“Soy valioso y los demás son confiables”. Puede intimar sin perder su identidad.",
+     crecer:["Sigue nombrando lo que sientes: es una fortaleza que da paz a los demás.","Tu calma puede ser apoyo para amigos o parejas que viven el vínculo con más miedo.","Cuida la confianza que tienes: no la des por sentada, se cultiva con actos."]},
+  A:{name:"Apego ansioso",color:"var(--red)",
+     infancia:"Suele formarse con un cuidado inconsistente: a veces había afecto y a veces no.",
+     hoy:"Miedo al abandono, búsqueda constante de confirmación, celos o sobreinterpretación.",
+     clave:"“No sé si me van a querer”. Se intensifica la búsqueda de cercanía.",
+     crecer:["Antes de enviar otro mensaje, respira y pregúntate: ¿qué necesito de verdad ahora?","Pide lo que necesitas de forma directa, sin pruebas ni indirectas.","Construye seguridad también dentro de ti: amistades, proyectos, descanso."]},
+  E:{name:"Apego evitativo",color:"var(--blue)",
+     infancia:"Suele formarse con un cuidador distante: se aprende que mostrar emoción no es seguro.",
+     hoy:"Dificultad para expresar sentimientos, autosuficiencia excesiva e incomodidad con la dependencia.",
+     clave:"“Debo arreglármelas solo”. Se desactiva la necesidad afectiva.",
+     crecer:["Practica contarle una emoción al día a alguien de confianza.","Pedir ayuda no es debilidad: para Bowlby el apego es una necesidad humana básica.","Fíjate si te alejas justo cuando alguien se acerca."]},
+  D:{name:"Apego desorganizado",color:"var(--violet)",
+     infancia:"Suele formarse cuando la figura de cuidado generaba miedo o confusión: protección y amenaza a la vez.",
+     hoy:"Relaciones intensas y contradictorias: búsqueda extrema y rechazo abrupto.",
+     clave:"No hay una estrategia coherente. Se confunden el amor y el miedo.",
+     crecer:["Ve despacio: la cercanía se puede construir por pasos pequeños.","Busca relaciones y espacios estables donde te sientas a salvo.","Si sientes mucha confusión entre amor y miedo, hablarlo con Bienestar Universitario o con un profesional puede ayudarte."]}
+};
+
+const LANGS = {
+  P:{name:"Palabras de afirmación",color:"var(--red)",desc:"Te llega al corazón escuchar o leer lo que la otra persona valora de ti.",dar:"Di en voz alta lo que admiras. Un mensaje concreto vale más que un “ok”.",cuidado:"Las críticas duras o la indiferencia verbal te pesan más que a otros."},
+  T:{name:"Tiempo de calidad",color:"var(--blue)",desc:"Sientes amor cuando alguien te da su atención completa, sin pantallas de por medio.",dar:"Planea momentos sin celular: una caminata, un café, una conversación larga.",cuidado:"Los planes cancelados o la atención dividida te dejan con sensación de lejanía."},
+  S:{name:"Actos de servicio",color:"var(--green)",desc:"Para ti, amor es que te echen una mano cuando más lo necesitas.",dar:"Pregunta “¿en qué te puedo ayudar hoy?” y hazlo sin que te lo pidan dos veces.",cuidado:"Las promesas de ayuda que no se cumplen te desaniman mucho."},
+  R:{name:"Regalos significativos",color:"var(--yellow)",desc:"Un detalle pequeño te dice “pensé en ti”. No importa el precio, sino el gesto.",dar:"Guarda notas de lo que le gusta a la otra persona y sorpréndela con algo sencillo.",cuidado:"Que alguien olvide una fecha importante puede dolerte más de lo que imaginas."},
+  C:{name:"Contacto físico",color:"var(--violet)",desc:"Un abrazo, tomarte de la mano o un gesto de cercanía te hacen sentir en casa.",dar:"Un abrazo a tiempo, siempre con respeto y con el sí de la otra persona.",cuidado:"La frialdad física o la distancia te pueden hacer sentir rechazo."}
+};
+
+const USES = {
+  deseo:{name:"Amor-deseo",short:"Desear, conocer, dialogar, compartir, acompañar",desc:"Te mueve buscar a la otra persona, conocerla a fondo y estar con ella. Para Yepes y Aranguren, “sin comunicación no se puede conocer a la persona amada”."},
+  afirm:{name:"Amor-afirmación",short:"Alegrarse, perdonar, ayudar, cuidar, consolar, acoger",desc:"Tu forma de amar dice “es bueno que tú existas”. Aceptas al otro, lo cuidas y sabes perdonar: “perdonar es renovar el amor”."},
+  elec:{name:"Amor-elección",short:"Preferir, comprender, escuchar, comprometer, ser leal, confiar",desc:"Para ti amar es decidir. Te pones en el lugar del otro y sostienes tu palabra: “amar es una elección reafirmada en el tiempo”."},
+  crea:{name:"Amor-creación",short:"Crear, decir, regalar, beneficiar, honrar",desc:"Tu amor se nota: lo dices, lo creas, lo celebras. “Todo amor es creador”: hace que existan cosas nuevas."},
+  don:{name:"Amor-don",short:"Corresponder, agradecer, darse, dar el ser, corregir",desc:"Para ti amar es darse. Es el modo más intenso de amar según Yepes y Aranguren: el don de sí."}
+};
+
+const MODS = [
+/* ---------------- APEGO ---------------- */
+{ id:"apego", name:"Apego", color:"var(--red)", shape:"tri", tag:"¿Cómo te vinculas cuando alguien te importa?", time:"6 min",
+  authors:["Bowlby (1969)","Waldinger (2015)"], refs:["bowlby","waldinger","yepes"],
+  intro:"El apego es como el “WiFi emocional”: la forma en que aprendimos a sentirnos seguros influye en cómo amamos hoy. Vas a descubrir tu tendencia, no para etiquetarte, sino para comprenderte.",
+  concepts:"apego según Bowlby (sistema que busca seguridad, necesidad humana básica); la persona no está determinada por su biografía: es relacional, libre y perfectible",
+  qs:[
+    {t:"light",k:"Semáforo emocional",q:"{Pcap} no responde en todo el día. ¿Cómo te sientes?",w:{g:{S:1},y:{A:1},r:{A:1,D:.5}}},
+    {t:"light",k:"Semáforo emocional",q:"Un amigo cancela un plan importante a última hora.",w:{g:{S:1},y:{A:.5,E:.5},r:{A:1,D:.5}}},
+    {t:"light",k:"Semáforo emocional",q:"Alguien importante para ti te critica.",w:{g:{S:1},y:{A:.5,E:.5},r:{D:1,A:.5}},tip:"¿Por qué la misma situación genera reacciones tan distintas? Tiene que ver con cómo aprendimos a vincularnos desde la infancia."},
+    {t:"choice",q:"Cuando {P} tarda en responder tus mensajes, ¿qué sientes?",o:[
+      {x:"Ansiedad o miedo de que algo esté mal.",w:{A:1}},
+      {x:"Indiferencia, porque prefiero tener espacio.",w:{E:1}},
+      {x:"Confianza en que probablemente está ocupado/a.",w:{S:1}},
+      {x:"Depende del contexto.",w:{S:.5,A:.25,E:.25}}]},
+    {t:"choice",q:"Después de una discusión fuerte, normalmente tú…",o:[
+      {x:"Busco hablar ya. No soporto la distancia.",w:{A:1}},
+      {x:"Me encierro y prefiero no tocar el tema.",w:{E:1}},
+      {x:"Me tomo un tiempo y luego propongo hablar con calma.",w:{S:1}},
+      {x:"Busco cercanía y de pronto quiero alejarme.",w:{D:1}}]},
+    {t:"choice",q:"Cuando alguien empieza a quererte de verdad…",o:[
+      {x:"Me alegra y me dejo querer.",w:{S:1}},
+      {x:"Me da miedo que se canse de mí.",w:{A:1}},
+      {x:"Siento que me quita espacio y me agobio.",w:{E:1}},
+      {x:"Me acerco y luego lo alejo sin saber bien por qué.",w:{D:1}}]},
+    {t:"choice",q:"Pedir ayuda cuando estás mal es, para ti…",o:[
+      {x:"Algo natural.",w:{S:1}},
+      {x:"Difícil: prefiero arreglármelas solo/a.",w:{E:1}},
+      {x:"Necesario, pero temo ser “demasiado”.",w:{A:1}},
+      {x:"Confuso: quiero ayuda pero desconfío de quien me la da.",w:{D:1}}]},
+    {t:"choice",q:"Al imaginar un compromiso a largo plazo sientes…",o:[
+      {x:"Ilusión y calma.",w:{S:1}},
+      {x:"Que necesito garantías de que no me van a dejar.",w:{A:1}},
+      {x:"Ganas de salir corriendo.",w:{E:1}},
+      {x:"Ilusión y miedo mezclados con mucha fuerza.",w:{D:1}}],
+     tip:"Bowlby (1969): el apego es un sistema biológico que busca seguridad. No es debilidad; es una necesidad humana básica."}
+  ],
+  result(sc){
+    const keys=["S","A","E","D"]; const tot=keys.reduce((a,k)=>a+(sc[k]||0),0)||1;
+    const sorted=keys.slice().sort((a,b)=>(sc[b]||0)-(sc[a]||0)); const st=ATTACH[sorted[0]];
+    return {key:sorted[0],title:st.name,summary:"Tu tendencia hoy: "+st.name.toLowerCase()+". "+st.hoy,
+      bars:keys.map(k=>({label:ATTACH[k].name.replace("Apego ","").replace(/^./,c=>c.toUpperCase()),val:Math.round((sc[k]||0)/tot*100),color:ATTACH[k].color})),
+      html:`<dl class="kv"><div><dt>Cómo suele configurarse</dt><dd>${st.infancia}</dd></div><div><dt>Cómo se manifiesta hoy</dt><dd>${st.hoy}</dd></div><div><dt>Clave</dt><dd>${st.clave}</dd></div></dl>`,
+      grow:st.crecer, note:"Es una tendencia según tus respuestas de hoy, no un diagnóstico. La persona no está determinada por su biografía: es un ser relacional, libre y perfectible."};
+  },
+  journal:"Piensa en una situación reciente que encendió tu “semáforo”. ¿Qué necesitabas en ese momento y cómo lo pediste?",
+  learn:[
+    {h:"El WiFi emocional",p:"Si la conexión fue estable, me relaciono con confianza. Si la señal era intermitente, vivo con inseguridad. Si nunca hubo señal clara, me cuesta confiar.",s:"Clase 4, Core II"},
+    {h:"Una necesidad, no una debilidad",p:"John Bowlby plantea que el apego es un sistema biológico que busca seguridad. Necesitar a otros es parte de ser humano.",s:"Bowlby (1969)"},
+    {h:"Cuatro estilos",p:"Seguro: confianza y diálogo. Ansioso: miedo al abandono y búsqueda de confirmación. Evitativo: autosuficiencia y dificultad para expresar. Desorganizado: búsqueda extrema y rechazo abrupto.",s:"Bowlby (1969), en Clase 4"},
+    {h:"No para etiquetarnos",p:"Estudiamos el apego para comprendernos. Y comprendernos no es quedarnos en la historia, sino asumir con libertad la tarea de crecer y relacionarnos mejor.",s:"Clase 4, Core II"},
+    {h:"Lo que dice el estudio de Harvard",p:"El estudio más largo sobre la felicidad encontró que las buenas relaciones nos mantienen más felices y saludables. No importa cuántos amigos tengas, sino la calidad de esos vínculos.",s:"Waldinger (2015)"}
+  ],
+  decide:["Esta semana voy a pedir lo que necesito de forma directa, sin indirectas.","Voy a contarle a alguien de confianza cómo me sentí en una situación difícil.","Antes de reaccionar, voy a pasar por mi semáforo: verde, amarillo o rojo."]
+},
+/* ---------------- LENGUAJES ---------------- */
+{ id:"lenguajes", name:"Lenguajes del amor", color:"var(--blue)", shape:"dia", tag:"¿Cómo das y recibes cariño?", time:"5 min",
+  authors:["Chapman"], refs:["chapman","yepes"],
+  intro:"Las personas expresan y reciben amor de formas diferentes. Vas a elegir entre pares de gestos, sin pensarlo mucho, para descubrir tu lenguaje predominante y el que usas para dar.",
+  concepts:"los cinco lenguajes del amor de Gary Chapman; amar bien implica aprender el lenguaje del otro",
+  qs:[
+    {t:"choice",k:"Calentamiento",q:"Imagina a alguien que te quiere mucho. ¿Qué te dolería más que nunca hiciera?",o:[
+      {x:"Decirte palabras bonitas.",w:{P:1.5}},{x:"Pasar tiempo de calidad contigo.",w:{T:1.5}},{x:"Abrazarte o tomarte de la mano.",w:{C:1.5}},{x:"Tener un detalle contigo.",w:{R:1.5}},{x:"Ayudarte cuando estás estresado/a.",w:{S:1.5}}]},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Que me digan “estoy orgulloso/a de ti”.",w:{P:1}},b:{x:"Una tarde entera sin celulares, solo conversando.",w:{T:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Un mensaje largo sobre lo que valora de mí.",w:{P:1}},b:{x:"Que me ayude con algo pendiente cuando estoy a full.",w:{S:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Un cumplido sincero frente a otros.",w:{P:1}},b:{x:"Un detalle pequeño que me diga “pensé en ti”.",w:{R:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Escuchar “te quiero” en voz alta.",w:{P:1}},b:{x:"Un abrazo largo, sin decir nada.",w:{C:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Que me acompañe a una vuelta aburrida solo por estar juntos.",w:{T:1}},b:{x:"Que haga esa vuelta por mí.",w:{S:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Planear juntos una salida.",w:{T:1}},b:{x:"Recibir una sorpresa inesperada.",w:{R:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Una caminata larga conversando.",w:{T:1}},b:{x:"Ver una película juntos, bien cerca.",w:{C:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Que me cocine algo cuando llego cansado/a.",w:{S:1}},b:{x:"Que me traiga mi snack favorito.",w:{R:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Que me ayude a organizar mi semana.",w:{S:1}},b:{x:"Que me tome de la mano cuando estoy nervioso/a.",w:{C:1}}},
+    {t:"pair",k:"¿Qué prefieres?",a:{x:"Una carta o algo hecho a mano.",w:{R:1}},b:{x:"Una palmada en la espalda cuando estoy estresado/a.",w:{C:1}}},
+    {t:"choice",k:"Ahora, cómo das",q:"Cuando quieres demostrarle cariño a un amigo o amiga, sueles…",o:[
+      {x:"Decirle lo que admiras de él o ella.",w:{gP:1}},{x:"Sacar tiempo para verse.",w:{gT:1}},{x:"Darle un abrazo.",w:{gC:1}},{x:"Llevarle un detalle.",w:{gR:1}},{x:"Ayudarle con lo que necesite.",w:{gS:1}}],
+     tip:"Cada persona suele tener uno o dos lenguajes predominantes (Chapman)."}
+  ],
+  result(sc){
+    const ks=["P","T","S","R","C"]; const max=Math.max(...ks.map(k=>sc[k]||0))||1;
+    const sorted=ks.slice().sort((a,b)=>(sc[b]||0)-(sc[a]||0)); const top=LANGS[sorted[0]], sec=LANGS[sorted[1]];
+    const give=ks.find(k=>sc["g"+k]); const gl=give?LANGS[give]:null;
+    let gap="";
+    if(gl){ gap = give===sorted[0] ? `<p>Das cariño con el mismo lenguaje con el que lo recibes: <b>${gl.name.toLowerCase()}</b>. Ojo: quien está a tu lado puede hablar otro.</p>`
+      : `<p>Recibes amor sobre todo con <b>${top.name.toLowerCase()}</b>, pero lo das con <b>${gl.name.toLowerCase()}</b>. Por eso a veces nos sentimos poco queridos aunque el otro sí lo intente.</p>`; }
+    return {key:sorted[0],title:top.name,summary:`Tu lenguaje principal es ${top.name.toLowerCase()} y el segundo es ${sec.name.toLowerCase()}.`,
+      bars:ks.map(k=>({label:LANGS[k].name,val:Math.round((sc[k]||0)/max*100),color:LANGS[k].color})),
+      html:`<p>${top.desc}</p><p class="muted">Tu segundo lenguaje: <b>${sec.name}</b>. ${sec.desc}</p>${gap}<dl class="kv"><div><dt>Cuidado con</dt><dd>${top.cuidado}</dd></div></dl>`,
+      grow:[`Cuéntale a alguien cercano que tu lenguaje es ${top.name.toLowerCase()}: no adivinan, se aprende.`,`Pregunta a tus personas importantes cuál es su lenguaje. Amar bien implica aprender el del otro.`,`Si alguien te ama en otro idioma, intenta reconocerlo: ${LANGS[sorted[4]].name.toLowerCase()} también es amor.`],
+      note:"Escala relativa: 100 es tu lenguaje más fuerte, no una calificación."};
+  },
+  journal:"¿Alguna vez te sentiste poco amado/a aunque la otra persona sí estaba intentando demostrarte afecto? ¿Qué lenguaje estaba usando?",
+  learn:[
+    {h:"Cinco idiomas",p:"Gary Chapman propone que las personas expresan y reciben amor de formas diferentes: palabras de afirmación, tiempo de calidad, actos de servicio, regalos significativos y contacto físico.",s:"Chapman"},
+    {h:"Uno o dos predominan",p:"Cada persona suele tener uno o dos lenguajes predominantes. Por eso un gesto que para ti es enorme, para otro puede pasar casi desapercibido.",s:"Chapman"},
+    {h:"La clave",p:"Amar bien implica aprender el lenguaje del otro. Esto fortalece las relaciones: de pareja, de amistad y de familia.",s:"Clase 8, Core II"},
+    {h:"Amar es decir",p:"El amor se manifiesta también con palabras que lo declaran de forma explícita. Hay que decirlo muchas veces: con palabras, dibujos, canciones, gestos.",s:"Yepes y Aranguren (2003)"},
+    {h:"Amar es atender",p:"Para escuchar se necesita atención: el cariño es atento y nada le pasa inadvertido. Atender es justo lo que permite descubrir el lenguaje del otro.",s:"Yepes y Aranguren (2003)"}
+  ],
+  decide:["Voy a preguntarle a una persona importante cuál es su lenguaje del amor.","Esta semana voy a demostrar cariño en el lenguaje del otro, no en el mío.","Voy a decir en voz alta algo que admiro de alguien cercano."]
+},
+/* ---------------- NOVIAZGO ---------------- */
+{ id:"noviazgo", name:"Noviazgos saludables", color:"var(--yellow)", shape:"cir", tag:"¿Distingues una relación sana de una que hace daño?", time:"7 min",
+  authors:["Conen (2017)","Rojas (2013)","Aristóteles"], refs:["conen","rojasAmigos","aristoteles","yepes"],
+  intro:"Vas a afinar tu radar: creencias para debatir, señales de alerta y la base de todo noviazgo sano, que es la amistad. Aquí sí hay respuestas que se pueden explicar, pero lo importante es el porqué.",
+  concepts:"el noviazgo como relación para conocerse, crecer y discernir un proyecto de vida; la amistad como base del noviazgo; amar es querer que el otro crezca (Conen); los tres tipos de amistad de Aristóteles",
+  pre:"Antes de empezar: ¿qué entiendes hoy por noviazgo? Escribe dos o tres ideas.",
+  qs:[
+    {t:"tf",k:"¿Verdadero o falso?",q:"“Si mi pareja me ama, debe ponerme por encima de todo: familia, amigos y proyectos.”",a:false,why:"Amar es querer que el otro crezca como persona (Conen, 2017). Quien te aísla de tu familia, tus amigos o tus proyectos no te está haciendo crecer."},
+    {t:"tf",k:"¿Verdadero o falso?",q:"“El amor verdadero implica sacrificarse totalmente por la otra persona.”",a:false,why:"Darse no es anularse. El amor al otro no se opone al amor propio: una autoestima sana facilita amar y dejarse amar, y las relaciones sanas buscan el bien de ambos (Conen, 2017)."},
+    {t:"tf",k:"¿Verdadero o falso?",q:"“Si mi pareja revisa mi celular es porque le importo y quiere cuidarme.”",a:false,why:"Amar es confiar: no fiscalizar, no ser celoso. Confiar es dar libertad al amado, sabiendo que el uso de ella hará crecer el amor (Yepes y Aranguren, 2003)."},
+    {t:"tf",k:"¿Verdadero o falso?",q:"“En una relación sana debemos hacerlo todo juntos.”",a:false,why:"Amar bien es aceptar al otro como es y respetar su identidad y su forma de ser. Cada uno conserva sus amistades, sus espacios y sus proyectos."},
+    {t:"tf",k:"¿Verdadero o falso?",q:"“Una relación que solo se basa en la emoción suele ser frágil.”",a:true,why:"Un noviazgo sano debería incluir amistad, admiración, respeto, conocimiento del otro y comunicación. La emoción sola no sostiene una relación."},
+    {t:"tf",k:"¿Verdadero o falso?",q:"“Enamorarse y amar son lo mismo.”",a:false,why:"Enamorarse es el embrión de un proceso amoroso, una fase inicial. Amar es querer el bien del otro en cuanto otro: una decisión."},
+    {t:"flag",q:"Te anima a ver a tus amigos y a seguir tus proyectos.",a:"sano",why:"Así se ve el amor que acompaña y promueve el crecimiento."},
+    {t:"flag",q:"Te pide tus contraseñas “para demostrar confianza”.",a:"alerta",why:"La confianza se da, no se exige. El control no es cuidado."},
+    {t:"flag",q:"Pueden hablar de un desacuerdo sin gritos ni humillaciones.",a:"sano",why:"Amar es dialogar: una relación de ida y vuelta. Sin comunicación no se puede conocer a la persona amada."},
+    {t:"flag",q:"Se enoja si no respondes en cinco minutos.",a:"alerta",why:"Es una forma de control. Cada persona tiene su tiempo y sus ocupaciones."},
+    {t:"flag",q:"Reconoce cuando se equivoca, pide perdón y cambia su actitud.",a:"sano",why:"Perdonar y dejarse perdonar renueva el amor (Yepes y Aranguren, 2003)."},
+    {t:"flag",q:"Hace chistes que te ridiculizan frente a otros.",a:"alerta",why:"Amar es honrar: mostrar públicamente el mérito del otro, no humillarlo."},
+    {t:"flag",q:"Respeta tu “no” sin insistir ni chantajear.",a:"sano",why:"Respetar la libertad del otro es la base de cualquier relación sana."},
+    {t:"choice",k:"La amistad, base del noviazgo",q:"“Somos amigos porque nos sirve: estudiamos juntos para el parcial.” ¿Qué tipo de amistad es?",o:[{x:"Por utilidad",ok:true},{x:"Por placer"},{x:"Por virtud"}],why:"Amistad por utilidad: existe porque ambas personas obtienen algún beneficio. Suele terminar cuando desaparece la utilidad (Aristóteles)."},
+    {t:"choice",k:"La amistad, base del noviazgo",q:"“Nos admiramos, buscamos el bien del otro y crecemos juntos.” ¿Qué tipo de amistad es?",o:[{x:"Por utilidad"},{x:"Por placer"},{x:"Por virtud",ok:true}],why:"Amistad por virtud: la forma más profunda y estable. Aristóteles afirma que esta es la amistad verdadera, y es la que un noviazgo sano necesita en su base."}
+  ],
+  result(sc,R){
+    const pct=Math.round(R.hits/R.total*100);
+    const t= pct>=85?"Radar afinado": pct>=60?"Radar en entrenamiento":"Radar por calibrar";
+    const miss=R.missed.slice(0,4);
+    return {key:t,title:t,summary:`Identificaste ${R.hits} de ${R.total} señales y creencias.`,
+      bars:[{label:"Creencias",val:Math.round((sc.tf||0)/6*100),color:"var(--yellow)"},{label:"Señales",val:Math.round((sc.flag||0)/7*100),color:"var(--red)"},{label:"Amistad",val:Math.round((sc.ami||0)/2*100),color:"var(--green)"}],
+      html:`<p>El noviazgo es una relación afectiva que permite <b>conocerse profundamente, crecer personalmente y discernir un posible proyecto de vida</b>. No es solo emoción: también implica responsabilidad, conocimiento y respeto.</p>`+
+        (miss.length?`<dl class="kv">${miss.map(m=>`<div><dt>Vale la pena repasar</dt><dd>${m}</dd></div>`).join("")}</dl>`:`<p class="muted">No se te escapó ninguna. Tu radar puede ayudar a otros.</p>`),
+      grow:["Un noviazgo sano incluye amistad, admiración, respeto, conocimiento del otro y comunicación.","Si reconoces señales de alerta en una relación cercana, habla con alguien de confianza.","Antes del noviazgo, la amistad: pregúntate qué tipo de amistad tienes con esa persona."],
+      note:"El radar mide qué tanto distingues lo sano de lo dañino, no qué tan buena es tu relación."};
+  },
+  journal:"Now I think… Compara lo que escribiste al inicio sobre el noviazgo con lo que piensas ahora. Menciona dos ideas que cambiaron y qué provocó el cambio.",
+  learn:[
+    {h:"¿Qué es el noviazgo?",p:"Una relación afectiva que permite conocerse profundamente, crecer personalmente y discernir un posible proyecto de vida. No es solo emoción: también implica responsabilidad, conocimiento y respeto.",s:"Clase 8, Core II"},
+    {h:"Amar es querer que el otro crezca",p:"Amar es buscar el verdadero bien de la otra persona, no lo que yo quiero para ella. El amor verdadero no controla: acompaña y promueve el crecimiento.",s:"Conen (2017)"},
+    {h:"Tres tipos de amistad",p:"Por utilidad: hay un beneficio y termina cuando se acaba. Por placer: disfrutar la compañía, agradable pero inestable. Por virtud: admiración mutua, bien del otro, crecimiento y estabilidad.",s:"Aristóteles, Ética a Nicómaco VIII–IX"},
+    {h:"La amistad verdadera",p:"Es una relación afectiva libre, recíproca y basada en la confianza. Un amigo verdadero no solo acompaña: también ayuda a ser mejor persona.",s:"Rojas (2013)"},
+    {h:"La amistad como base",p:"Un noviazgo sano debería incluir amistad, admiración, respeto, conocimiento del otro y comunicación. Una relación que solo se basa en la emoción suele ser frágil.",s:"Clase 7, Core II"}
+  ],
+  decide:["Voy a hablar con alguien de confianza sobre una señal que me inquieta.","Voy a cuidar mis amistades y espacios propios, también si estoy en una relación.","Voy a preguntarme qué tipo de amistad hay en la base de mis relaciones."]
+},
+/* ---------------- MATRIMONIO ---------------- */
+{ id:"matrimonio", name:"Matrimonio", color:"var(--green)", shape:"sq", tag:"¿Qué significa comprometerse para siempre?", time:"7 min",
+  authors:["Yepes y Aranguren (2003)","Aristóteles","Waldinger (2015)"], refs:["yepes","aristoteles","waldinger"],
+  intro:"Para Aristóteles, amar es querer el bien del otro en cuanto otro: una decisión. Vas a ordenar el proceso amoroso, reconocer los actos del amor y descubrir cuál es tu forma más fuerte de amar.",
+  concepts:"los actos del amor de Yepes y Aranguren (amor-deseo, afirmación, elección, creación y don); el proceso amoroso de la disposición al amor maduro; amar como decisión (Aristóteles)",
+  qs:[
+    {t:"order",k:"Ordena el proceso amoroso",q:"Toca las fases en el orden en que madura el amor.",items:["Disposición","Flechazo","Enamoramiento","Amor maduro"],
+      why:["Disposición: “no amo a nadie concreto aún, pero quisiera hacerlo”. Importante, pero no necesaria.","Flechazo: atracción, exclusividad y una atención que se concentra en una sola persona.","Enamoramiento: el embrión del proceso amoroso. Es una fase inicial, no todo el amor.","Amor maduro: querer el bien del otro en cuanto otro. Una decisión que se sostiene."]},
+    {t:"choice",k:"¿Qué acto del amor es?",q:"Le dices a alguien “es bueno que existas” y celebras sus logros como propios.",o:[{x:"Amor-deseo"},{x:"Amor-afirmación",ok:true},{x:"Amor-elección"},{x:"Amor-don"}],why:"Amor-afirmación: amar es alegrarse. La alegría nace al afirmar “es bueno que tú existas”."},
+    {t:"choice",k:"¿Qué acto del amor es?",q:"Te quedas el sábado acompañando a tu amigo que está triste, aunque tenías otro plan.",o:[{x:"Amor-creación"},{x:"Amor-deseo"},{x:"Amor-elección",ok:true},{x:"Amor-afirmación"}],why:"Amor-elección: amar es preferir y ponerse en el lugar del otro. Elegir amorosamente transforma la elección."},
+    {t:"choice",k:"¿Qué acto del amor es?",q:"Quieres conocer todo de esa persona: sus historias, sus gustos, sus miedos.",o:[{x:"Amor-deseo",ok:true},{x:"Amor-don"},{x:"Amor-elección"},{x:"Amor-creación"}],why:"Amor-deseo: amar es conocer, un poseer mucho más profundo que el tener físico."},
+    {t:"choice",k:"¿Qué acto del amor es?",q:"Le escribes una canción y se la dedicas.",o:[{x:"Amor-afirmación"},{x:"Amor-creación",ok:true},{x:"Amor-deseo"},{x:"Amor-don"}],why:"Amor-creación: amar es decir y crear. El amor se manifiesta con palabras, dibujos, canciones y gestos."},
+    {t:"choice",k:"¿Qué acto del amor es?",q:"Un esposo y una esposa deciden abrirse a tener un hijo.",o:[{x:"Amor-elección"},{x:"Amor-afirmación"},{x:"Amor-creación"},{x:"Amor-don",ok:true}],why:"Amor-don: lo más radical que se puede dar es el ser. El hombre y la mujer pueden dar el ser a sus hijos."},
+    {t:"choice",k:"Tu forma de amar",q:"En una relación, lo que más te mueve es…",o:[{x:"Conocer a fondo a la otra persona.",w:{deseo:1}},{x:"Celebrar quién es y cuidarla.",w:{afirm:1}},{x:"Comprometerme y ser leal.",w:{elec:1}},{x:"Crear detalles y momentos.",w:{crea:1}}]},
+    {t:"choice",k:"Tu forma de amar",q:"Cuando la otra persona falla…",o:[{x:"La perdono y la ayudo a levantarse.",w:{afirm:1}},{x:"Intento ponerme en su lugar y comprender.",w:{elec:1}},{x:"Le digo la verdad con cariño para que crezca.",w:{don:1}},{x:"Busco hablarlo para entender qué le pasó.",w:{deseo:1}}]},
+    {t:"choice",k:"Tu forma de amar",q:"Un matrimonio sólido se construye, sobre todo, con…",o:[{x:"Un compromiso que se reafirma cada día.",w:{elec:1}},{x:"La entrega total de uno al otro.",w:{don:1}},{x:"La alegría de estar juntos.",w:{afirm:1}},{x:"Proyectos que se crean juntos.",w:{crea:1}}]},
+    {t:"choice",k:"Tu forma de amar",q:"Si piensas en “para siempre”, lo que más te inspira es…",o:[{x:"Confiar y esperar juntos.",w:{elec:1}},{x:"Darse el uno al otro.",w:{don:1}},{x:"Seguir descubriéndose.",w:{deseo:1}},{x:"Agradecer cada día lo recibido.",w:{don:.5,crea:.5}}],
+     tip:"Amar es comprometer: sin compromiso el amor no podría ser duradero. Amar es una elección reafirmada en el tiempo."}
+  ],
+  result(sc,R){
+    const ks=["deseo","afirm","elec","crea","don"]; const max=Math.max(...ks.map(k=>sc[k]||0))||1;
+    const s=ks.slice().sort((a,b)=>(sc[b]||0)-(sc[a]||0)); const top=USES[s[0]], low=USES[s[4]];
+    return {key:s[0],title:top.name,summary:`Tu forma más fuerte de amar es ${top.name.toLowerCase()} (${top.short.toLowerCase()}).`,
+      bars:ks.map(k=>({label:USES[k].name,val:Math.round((sc[k]||0)/max*100),color:"var(--green)"})),
+      html:`<p>${top.desc}</p><dl class="kv"><div><dt>Actos de este uso</dt><dd>${top.short}</dd></div><div><dt>Lo que puedes cultivar</dt><dd><b>${low.name}</b>: ${low.short.toLowerCase()}.</dd></div><div><dt>Actos que reconociste</dt><dd>${R.hits} de ${R.total} (incluye el orden del proceso amoroso).</dd></div></dl>`,
+      grow:[`Practica un acto de ${low.name.toLowerCase()} esta semana: ${low.short.split(",")[0].toLowerCase()}.`,"Recuerda que el enamoramiento es solo el inicio: el amor madura cuando se decide y se sostiene.","Escríbete la Carta 2036 en tu perfil: ¿qué pasó con tus relaciones más significativas?"],
+      note:"Los cinco usos de la voluntad no compiten: un amor maduro los integra todos."};
+  },
+  journal:"Si piensas en un matrimonio que admiras (tus abuelos, tus papás, unos amigos), ¿qué actos del amor ves en ellos?",
+  learn:[
+    {h:"¿Qué es amar?",p:"Aristóteles: querer el bien del otro en cuanto otro. Querer es una decisión; el bien es la búsqueda de la felicidad; del otro habla de respeto; en cuanto otro significa aceptarlo como es.",s:"Aristóteles, en Clase 5"},
+    {h:"El proceso amoroso",p:"Enamorarse es el embrión de un proceso. Así como la infancia no es toda la vida, el enamoramiento no es todo el amor: cada fase aporta lo suyo.",s:"Viladrich, en Clase 5"},
+    {h:"Cinco usos de la voluntad",p:"Amor-deseo, amor-afirmación, amor-elección, amor-creación y amor-don. Cada uno se expresa en actos concretos: conocer, perdonar, comprometerse, regalar, darse.",s:"Yepes y Aranguren (2003)"},
+    {h:"Amar es comprometer",p:"Entregamos nuestro futuro al amado. Sin compromiso el amor no podría ser duradero: amar es una elección reafirmada en el tiempo. Y amar es ser leal: seguir amando cuando el otro está ausente.",s:"Yepes y Aranguren (2003)"},
+    {h:"Amar es darse",p:"El modo más radical de dar es darse a uno mismo: le damos al otro lo que él más quiere, nosotros mismos. Este es el modo más intenso de amar.",s:"Yepes y Aranguren (2003)"}
+  ],
+  decide:["Voy a hacer un acto concreto de compromiso: cumplir algo que prometí.","Voy a escribir mi Carta 2036 sobre la vida afectiva que quiero construir.","Voy a preguntarle a una pareja que admiro qué los ha sostenido."]
+},
+/* ---------------- SEXUALIDAD ---------------- */
+{ id:"sexualidad", name:"Sexualidad", color:"var(--violet)", shape:"hex", tag:"Consenso, autocuidado y una mirada integral", time:"6 min",
+  authors:["Yepes y Aranguren (2003)","Clase 2, Core II"], refs:["yepes","conen"],
+  intro:"Hablar de sexualidad de forma consciente y sin tabúes empieza por entender a la persona completa: cuerpo, emociones, razón y voluntad. Este módulo es privado: tus respuestas se quedan solo en tu dispositivo.",
+  concepts:"la persona como unidad de dimensión física, psicoafectiva y espiritual (razón y voluntad); la voluntad como querer lo que me perfecciona; consentimiento libre; actitudes autónomas, responsables y conscientes respecto a la afectividad y la sexualidad",
+  qs:[
+    {t:"choice",k:"Dimensiones de la persona",q:"Dormir bien, comer a tiempo y cuidar tus hábitos corresponde a la dimensión…",o:[{x:"Física",ok:true},{x:"Psicoafectiva"},{x:"Espiritual"}],why:"Somos cuerpo. La dimensión física permite suplir necesidades básicas como comer y descansar, y se cuida con hábitos."},
+    {t:"choice",k:"¿Emoción o sentimiento?",q:"Una sorpresa repentina que te acelera el corazón es…",o:[{x:"Una emoción",ok:true},{x:"Un sentimiento"}],why:"La emoción es de corta duración y alta intensidad, con respuestas fisiológicas evidentes."},
+    {t:"choice",k:"¿Emoción o sentimiento?",q:"El cariño estable que sientes por alguien desde hace años es…",o:[{x:"Una emoción"},{x:"Un sentimiento",ok:true}],why:"El sentimiento tiene menos intensidad, dura más en el tiempo y no siempre tiene una respuesta fisiológica evidente. Ejemplo: el amor."},
+    {t:"choice",k:"Dimensiones de la persona",q:"Decidir con calma qué es bueno para ti, aunque haya presión de grupo, es obra de…",o:[{x:"Los impulsos"},{x:"La razón y la voluntad",ok:true},{x:"La suerte"}],why:"La dimensión espiritual (que no es lo mismo que lo religioso) incluye la razón y la voluntad. La voluntad no es “hacer lo que quiero”, sino querer lo que me perfecciona como persona."},
+    {t:"tf",k:"Consentimiento",q:"“Si dijo que sí una vez, ese sí vale para siempre.”",a:false,why:"El consentimiento se da para cada momento y se puede retirar en cualquier momento."},
+    {t:"tf",k:"Consentimiento",q:"“Si la otra persona no dice nada, quiere decir que sí.”",a:false,why:"El silencio no es consentimiento. Solo un sí libre y claro lo es."},
+    {t:"tf",k:"Consentimiento",q:"“Una persona bajo los efectos del alcohol puede consentir plenamente.”",a:false,why:"Para consentir hay que poder decidir con conciencia y libertad. El alcohol y otras sustancias afectan la razón y la voluntad."},
+    {t:"tf",k:"Consentimiento",q:"“Decir ‘si me quisieras, lo harías’ es una forma de presión.”",a:true,why:"Es chantaje emocional. Amar es buscar el bien del otro, no conseguir algo a costa de su libertad."},
+    {t:"scale",k:"Tu brújula de autocuidado",q:"Conozco mis límites y sé por qué los tengo.",d:"lim"},
+    {t:"scale",k:"Tu brújula de autocuidado",q:"Puedo decir que no sin sentir culpa.",d:"no"},
+    {t:"scale",k:"Tu brújula de autocuidado",q:"Mis decisiones afectivas nacen de mis convicciones, no de la presión social.",d:"conv"},
+    {t:"scale",k:"Tu brújula de autocuidado",q:"Tengo con quién hablar de estos temas con confianza.",d:"red"}
+  ],
+  result(sc,R){
+    const dims={lim:"Conocer mis límites",no:"Decir que no",conv:"Decidir por convicción",red:"Tener con quién hablar"};
+    const ks=Object.keys(dims); const avg=ks.reduce((a,k)=>a+(sc[k]||0),0)/ks.length;
+    const low=ks.slice().sort((a,b)=>(sc[a]||0)-(sc[b]||0))[0];
+    const t= avg>=4?"Brújula firme": avg>=3?"Brújula en construcción":"Brújula por orientar";
+    return {key:t,title:t,summary:`Tu brújula de autocuidado marca ${avg.toFixed(1)} de 5. Conceptos acertados: ${R.hits} de ${R.total}.`,
+      bars:ks.map(k=>({label:dims[k],val:Math.round((sc[k]||0)/5*100),color:"var(--violet)"})),
+      html:`<p>La persona es una unidad: cuerpo, emociones, razón y voluntad van juntos. Por eso las decisiones sobre la sexualidad no son solo físicas: comprometen a toda la persona.</p><dl class="kv"><div><dt>Tu punto para fortalecer</dt><dd>${dims[low]}.</dd></div><div><dt>La voluntad se educa</dt><dd>Repitiendo actos buenos y libres, y formando virtudes como la prudencia, la fortaleza y la templanza.</dd></div></dl>`,
+      grow:["Escribe tres límites personales y por qué son importantes para ti.","Practica un “no” amable y firme en algo pequeño de tu día.","Si viviste algo sin tu consentimiento o algo te hizo sentir mal, habla con alguien de confianza o con Bienestar Universitario."],
+      note:"Tus respuestas de este módulo solo se guardan en este dispositivo."};
+  },
+  journal:"¿Qué dimensión de la persona (física, psicoafectiva o espiritual) crees que se descuida más fácilmente en jóvenes de tu edad? ¿Qué te ayuda a ti a cuidarte como un todo?",
+  learn:[
+    {h:"Tres dimensiones",p:"Física: somos cuerpo, con necesidades y hábitos. Psicoafectiva: emociones y sentimientos. Espiritual: razón y voluntad, que no es lo mismo que lo religioso.",s:"Clase 2, Core II"},
+    {h:"Emoción y sentimiento",p:"La emoción es corta, intensa y con respuesta física evidente, como la sorpresa. El sentimiento es más suave y duradero, como el amor.",s:"Clase 2, Core II"},
+    {h:"La voluntad",p:"Es la facultad que permite elegir, autodeterminarse y construirse. No es “hacer lo que quiero”, sino querer lo que me perfecciona. Se educa repitiendo actos buenos y libres.",s:"Clase 2, Core II"},
+    {h:"Consentimiento",p:"Un sí es válido solo si es libre, consciente y para ese momento. Se puede retirar siempre. El silencio, la presión o el alcohol no son un sí.",s:"Módulo CoreHoot"},
+    {h:"Autonomía y responsabilidad",p:"El objetivo es comprender, valorar y desarrollar criterios para asumir actitudes autónomas, responsables y conscientes respecto a la afectividad y la sexualidad.",s:"Objetivo del Proyecto Core II"}
+  ],
+  decide:["Voy a escribir mis límites personales y por qué los tengo.","Voy a hablar de este tema con una persona de confianza.","Voy a tomar una decisión afectiva desde la convicción, no desde la presión."]
+},
+/* ---------------- RELACIONES LÍQUIDAS ---------------- */
+{ id:"liquidas", name:"Relaciones líquidas", color:"var(--teal)", shape:"wave", tag:"¿Qué tan líquidos son tus vínculos en la era digital?", time:"6 min",
+  authors:["Bauman (2005)","Rojas (1992)","McGinnis (2020)","Turkle (2017)"], refs:["bauman","rojasLight","mcginnis","han","turkle","illouz"],
+  intro:"Más conectados digitalmente, no necesariamente más conectados emocionalmente. Vas a vivir siete escenas de tu celular. Elige lo que harías de verdad y mira cómo se mueven tus medidores.",
+  concepts:"amor líquido de Bauman (vínculos frágiles y reversibles); FOMO y FOBO según McGinnis (relaciones provisionales, compromiso visto como amenaza); el hombre light de Enrique Rojas; gratificación inmediata e idealización; la conversación según Turkle",
+  qs:[
+    {t:"choice",k:"23:04",q:"Ves historias de tus amigos en un plan al que no fuiste.",o:[{x:"Me alegro por ellos y sigo con mi noche.",w:{}},{x:"Siento que me perdí lo mejor y no puedo dormir.",w:{fomo:2}},{x:"Les escribo para ir la próxima vez.",w:{}},{x:"Busco ya mismo algo “mejor” que hacer.",w:{fomo:1,grat:1}}]},
+    {t:"choice",k:"Nuevo match",q:"Llevas tres semanas saliendo con alguien que te gusta. Te aparece otro match atractivo.",o:[{x:"Sigo conociendo a quien ya empecé.",w:{}},{x:"Respondo, por si acaso es mejor opción.",w:{fobo:2}},{x:"Ya no sé a quién elegir y no decido nada.",w:{fobo:2}},{x:"Me ilusiono: seguro el nuevo es “el indicado”.",w:{ideal:2}}]},
+    {t:"choice",k:"Visto ✓✓",q:"Te dejan en visto hace dos horas.",o:[{x:"Espero: puede estar ocupado/a.",w:{}},{x:"Ya fue. Siguiente.",w:{grat:2}},{x:"Reviso su última conexión cada cinco minutos.",w:{fomo:1,ideal:1}},{x:"Le escribo cinco mensajes seguidos.",w:{grat:1,fomo:1}}]},
+    {t:"choice",k:"Planes",q:"Hablar de algo serio a futuro te parece…",o:[{x:"Algo que quiero construir con calma.",w:{}},{x:"Una amenaza a mi libertad.",w:{fobo:2}},{x:"Aburrido: prefiero vivir el momento. YOLO.",w:{grat:2}},{x:"Bien, si la persona es perfecta.",w:{ideal:2}}],tip:"McGinnis: cuando las relaciones se viven como provisionales, el compromiso se percibe como una amenaza a la autonomía."},
+    {t:"choice",k:"Filtro off",q:"Tu crush resulta tener defectos que no se veían en Instagram.",o:[{x:"Normal: nadie es perfecto.",w:{}},{x:"Me decepciona: no era lo que imaginé.",w:{ideal:2}},{x:"Busco a alguien que sí encaje.",w:{fobo:1,grat:1}},{x:"Hago como si no los viera y sigo idealizando.",w:{ideal:1}}]},
+    {t:"choice",k:"Modo avión",q:"Un fin de semana sin redes sociales sería…",o:[{x:"Un buen descanso.",w:{}},{x:"Imposible: me perdería todo.",w:{fomo:2}},{x:"Aburrido: necesito estímulos todo el tiempo.",w:{grat:2}},{x:"Difícil, pero lo intentaría.",w:{fomo:1}}]},
+    {t:"choice",k:"Cuando cuesta",q:"Cuando una relación se pone difícil…",o:[{x:"La trabajo con diálogo.",w:{}},{x:"La termino: hay muchas opciones.",w:{fobo:1,grat:1}},{x:"Me pregunto si me estoy perdiendo algo mejor.",w:{fobo:2}},{x:"Pienso que el amor verdadero no debería costar.",w:{ideal:2}}],tip:"Bauman: en el amor líquido los vínculos se vuelven frágiles y reversibles, fáciles de deshacer."}
+  ],
+  result(sc){
+    const d={fomo:{n:"FOMO",l:"Miedo a perderte algo",x:"Sientes que siempre hay algo mejor pasando en otro lugar. La cultura YOLO empuja a vivir todo ya."},
+             fobo:{n:"FOBO",l:"Miedo a una mejor opción",x:"Te cuesta elegir por temor a equivocarte. Según McGinnis, se reemplaza la profundidad por la opcionalidad, y eso produce insatisfacción: nunca te instalas en lo que eliges."},
+             grat:{n:"Gratificación inmediata",l:"Lo quiero ya",x:"Si algo no da resultado rápido, pierdes el interés. Es la lógica del rendimiento y del “siguiente”."},
+             ideal:{n:"Idealización",l:"El amor de película",x:"Esperas una persona o una relación perfecta. La realidad, con sus defectos, decepciona."}};
+    const ks=Object.keys(d); const tot=ks.reduce((a,k)=>a+(sc[k]||0),0); const idx=Math.min(100,Math.round(tot/14*100));
+    const top=ks.slice().sort((a,b)=>(sc[b]||0)-(sc[a]||0))[0];
+    const t= idx<25?"Vínculos sólidos": idx<50?"Algo de liquidez":"Alta liquidez";
+    return {key:t,title:t,summary:`Tu índice de liquidez es ${idx} de 100. ${tot?"Tu medidor más alto: "+d[top].n+".":""}`,
+      bars:ks.map(k=>({label:d[k].n,val:Math.min(100,Math.round((sc[k]||0)/6*100)),color:"var(--teal)"})),
+      html:(tot?`<dl class="kv"><div><dt>${d[top].n}: ${d[top].l}</dt><dd>${d[top].x}</dd></div></dl>`:"")+`<p class="muted">Zygmunt Bauman llamó <b>amor líquido</b> a la fragilidad de los vínculos de hoy: relaciones que se viven como provisionales y se deshacen con facilidad. Enrique Rojas describe al <b>hombre light</b>: una vida sin compromisos firmes.</p>`,
+      grow:["Prueba una conversación de media hora sin celulares en la mesa (Turkle).","Antes de buscar “algo mejor”, pregúntate qué estás dejando de construir.","Recuerda: una ruptura no es solo terminar. Revela cómo hemos amado y nos invita a crecer."],
+      note:"Índice orientativo: 0 es nada líquido y 100 es muy líquido."};
+  },
+  journal:"Conecta, amplía, cuestiona: ¿qué idea de este módulo conecta con lo que ves en las relaciones de hoy? ¿Qué creencia tuya queda en tensión?",
+  learn:[
+    {h:"Amor líquido",p:"Bauman describe la fragilidad y la temporalidad de los vínculos contemporáneos: relaciones que se conectan y desconectan con la misma facilidad que una app.",s:"Bauman (2005)"},
+    {h:"FOMO y FOBO",p:"FOMO es el miedo a perderse algo. FOBO es el miedo a elegir y que aparezca una mejor opción. Las relaciones se viven como provisionales y la persona nunca se instala en lo que elige.",s:"McGinnis (2020)"},
+    {h:"El hombre light",p:"El psiquiatra Enrique Rojas describe a una persona sin compromisos firmes ni valores sólidos: todo es ligero, rápido y desechable, incluido el amor.",s:"Rojas (1992)"},
+    {h:"Sociedad del cansancio",p:"Byung-Chul Han describe una sociedad del rendimiento: siempre hay que producir y optimizar. Esa lógica también se cuela en cómo elegimos y descartamos personas.",s:"Han (2012)"},
+    {h:"Recuperar la conversación",p:"Sherry Turkle advierte que lo digital puede debilitar la conexión emocional. La conversación cara a cara es donde se aprende la empatía.",s:"Turkle (2017)"},
+    {h:"Cuando termina",p:"La ruptura amorosa no es solo el final de una relación: revela cómo hemos amado y nos invita a crecer, integrando el dolor para amar con más libertad, verdad y madurez.",s:"Clase 9, Core II"}
+  ],
+  decide:["Voy a tener una conversación sin celular con alguien importante.","Voy a dejar de buscar “algo mejor” y a cuidar lo que ya estoy construyendo.","Voy a probar unas horas en modo avión este fin de semana."]
+}
+];
+const MOD = Object.fromEntries(MODS.map(m=>[m.id,m]));
+
+/* ===================== MOTOR ===================== */
+const KEY="corehoot.v1";
+const DEF=()=>({profile:null,mods:{},commits:[],carta:"",feedback:{stars:0,text:""},points:0,sound:false});
+let S=DEF();
+try{const raw=localStorage.getItem(KEY); if(raw){S=Object.assign(DEF(),JSON.parse(raw));}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+const app=$("#app");
+let SAMPLE=null;
+
+function nameOf(){return (S.profile&&S.profile.name)||"Explorador/a";}
+function P(cap){const p=S.profile&&S.profile.status==="pareja"?"tu pareja":"la persona con la que sales";return cap?p[0].toUpperCase()+p.slice(1):p;}
+function pz(s){return esc(s).replace(/\{Pcap\}/g,P(true)).replace(/\{P\}/g,P(false)).replace(/\{name\}/g,esc(nameOf()));}
+
+/* ---------- Formas y búho ---------- */
+function shape(k,fill="#fff",cls="shape"){
+  const f=`fill="${fill}"`;
+  const m={tri:`<path d="M16 4 L29 27 L3 27 Z" ${f}/>`,dia:`<path d="M16 2 L30 16 L16 30 L2 16 Z" ${f}/>`,cir:`<circle cx="16" cy="16" r="13" ${f}/>`,
+    sq:`<rect x="4" y="4" width="24" height="24" rx="3" ${f}/>`,hex:`<path d="M9 4 H23 L30 16 L23 28 H9 L2 16 Z" ${f}/>`,
+    wave:`<path d="M2 12 Q9 4 16 12 T30 12 V27 H2 Z" ${f}/>`,star:`<path d="M16 2 L20 12 L30 12 L22 19 L25 30 L16 23 L7 30 L10 19 L2 12 L12 12 Z" ${f}/>`};
+  return `<svg class="${cls}" viewBox="0 0 32 32" aria-hidden="true">${m[k]||m.cir}</svg>`;
+}
+const TILESH=["tri","dia","cir","sq","star"];
+function owl(cls="owl bob",mood=""){
+  const eye=(cx)=>`<circle cx="${cx}" cy="50" r="17" fill="#fff"/><circle cx="${cx+(mood==="look"?4:0)}" cy="${mood==="happy"?48:52}" r="8" fill="#1b1033"/><circle cx="${cx+3}" cy="48" r="2.6" fill="#fff"/><rect class="lid" x="${cx-18}" y="33" width="36" height="34" rx="17" fill="#7b55e0"/>`;
+  return `<svg class="${cls}" viewBox="0 0 120 120" aria-hidden="true">
+  <path d="M24 22 L40 38 L30 44 Z" fill="#6a46d6"/><path d="M96 22 L80 38 L90 44 Z" fill="#6a46d6"/>
+  <rect x="20" y="26" width="80" height="84" rx="38" fill="#7b55e0"/>
+  <ellipse cx="60" cy="84" rx="26" ry="22" fill="#b9a2ff"/>
+  <path d="M48 80 q4 4 8 0 M58 88 q4 4 8 0 M50 96 q4 4 8 0 M64 78 q4 4 8 0" stroke="#7b55e0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  ${eye(42)}${eye(78)}
+  <path d="M55 62 L65 62 L60 72 Z" fill="#ffd166"/>
+  ${mood==="happy"?'<circle cx="30" cy="68" r="5" fill="#ff7aa8" opacity=".6"/><circle cx="90" cy="68" r="5" fill="#ff7aa8" opacity=".6"/>':""}
+  <path d="M40 110 l-4 6 M48 110 l0 7 M72 110 l0 7 M80 110 l4 6" stroke="#ffd166" stroke-width="4" stroke-linecap="round"/></svg>`;
+}
+function hoot(msg,mood){return `<div class="hoot">${owl("owl bob",mood)}<div class="speech">${msg}</div></div>`;}
+
+/* ---------- Sonido ---------- */
+let AC=null;
+function beep(f=660,d=.12,type="sine",v=.08,delay=0){
+  if(!S.sound) return; try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02);}catch(e){}
+}
+const SFX={tap:()=>beep(520,.08,"triangle"),good:()=>{beep(660,.1,"triangle");beep(880,.16,"triangle",.08,.1)},bad:()=>{beep(300,.18,"sawtooth",.04)},
+  tick:()=>beep(440,.1,"square",.04),go:()=>beep(880,.25,"square",.05),win:()=>{[523,659,784,1046].forEach((f,i)=>beep(f,.22,"triangle",.07,i*.12))}};
+
+/* ---------- Utilidades UI ---------- */
+function toast(t){const el=document.createElement("div");el.className="toast";el.setAttribute("role","status");el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),2400);}
+function addPts(n){S.points=(S.points||0)+n;save();const p=$("#pts");if(p)p.textContent="✦ "+S.points.toLocaleString("es-CO");}
+function copyText(txt){
+  const done=()=>toast("Copiado. Ya puedes pegarlo donde quieras.");
+  const fallback=()=>{const ta=$("#copybox");if(ta){ta.hidden=false;ta.value=txt;ta.focus();ta.select();toast("Selecciona y copia el texto del recuadro.");}};
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback);} else fallback(); }catch(e){fallback();}
+}
+function confetti(){
+  if(reduce) return; const c=document.createElement("canvas");c.className="confetti";document.body.appendChild(c);
+  const x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;const cols=["#e21b3c","#1368ce","#e2a400","#26890c","#ffd166","#8a5cff"];
+  const ps=Array.from({length:140},()=>({x:innerWidth/2,y:innerHeight*.35,vx:(Math.random()-.5)*14,vy:Math.random()*-12-4,s:Math.random()*8+4,c:cols[Math.random()*6|0],r:Math.random()*6,k:Math.random()*4|0}));
+  let t=0;(function fr(){x.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;
+    if(p.k===0){x.beginPath();x.arc(0,0,p.s/2,0,6.3);x.fill();}else x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore();});
+    if(++t<110)requestAnimationFrame(fr);else c.remove();})();
+}
+
+/* ---------- Cielo ---------- */
+(function sky(){
+  const c=$("#sky"),x=c.getContext("2d");let st=[],w,h;
+  function rs(){w=c.width=innerWidth*devicePixelRatio;h=c.height=innerHeight*devicePixelRatio;st=Array.from({length:Math.min(220,(innerWidth*innerHeight)/7000|0)},()=>({x:Math.random()*w,y:Math.random()*h,r:(Math.random()*1.3+.3)*devicePixelRatio,p:Math.random()*6.3,s:Math.random()*.02+.005}));}
+  function draw(tw){x.clearRect(0,0,w,h);st.forEach(s=>{const a=.35+.65*Math.abs(Math.sin(s.p+tw*s.s));x.globalAlpha=a;x.fillStyle="#efe6ff";x.beginPath();x.arc(s.x,s.y,s.r,0,6.3);x.fill();if(!reduce){s.y-=.04*devicePixelRatio;if(s.y<0)s.y=h;}});}
+  rs();addEventListener("resize",rs);if(reduce){draw(0);return;}let t=0;(function lp(){t++;draw(t);requestAnimationFrame(lp);})();
+})();
+
+/* ---------- Navegación ---------- */
+function setNav(v){document.querySelectorAll("nav.main a").forEach(x=>{if(x.dataset.v===v)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current");});const p=$("#pts");if(p)p.textContent="✦ "+(S.points||0).toLocaleString("es-CO");}
+function route(){
+  const h=(location.hash||"#inicio").slice(1);
+  if(!S.profile && h!=="proyecto") return lobby();
+  if(h.startsWith("m-")&&MOD[h.slice(2)]) return startModule(h.slice(2));
+  if(h==="perfil") return profile();
+  if(h==="proyecto") return project();
+  return home();
+}
+addEventListener("hashchange",()=>{route();scrollTo({top:0,behavior:reduce?"auto":"smooth"});});
+function go(h){if(location.hash==="#"+h)route();else location.hash=h;}
+
+/* ---------- Lobby / registro ---------- */
+function lobby(){
+  setNav("");
+  const st={name:"",status:"",motive:""};
+  app.innerHTML=`<section class="lobby">
+    <div class="stack">
+      <div class="eyebrow">Proyecto Core II · Persona y Afectividad</div>
+      <div class="wordmark">Core<b>Hoot!</b></div>
+      <p class="lead">Conócete, entiende cómo amas y construye mejores relaciones. Seis módulos con quizzes, resultados personalizados y retos para tu vida real.</p>
+      <div class="cycle"><span style="background:var(--red)">Conocerse</span><i>→</i><span style="background:var(--blue)">Reflexionar</span><i>→</i><span style="background:var(--yellow);color:#2a1700">Comprender</span><i>→</i><span style="background:var(--green)">Decidir</span></div>
+      ${hoot("¡Hola! Soy Hoot. Te acompaño en cada módulo. Aquí no hay notas: hay descubrimientos. Tus respuestas se guardan solo en este dispositivo.","happy")}
+    </div>
+    <form class="pin stack" id="join" autocomplete="off">
+      <div class="eyebrow" style="color:#6b5aa0">Paso 1 de 1</div>
+      <h3>¿Cómo quieres que te llame?</h3>
+      <input type="text" id="nm" maxlength="24" placeholder="Tu apodo">
+      <div><b>¿En qué momento estás?</b></div>
+      <div class="opt" data-g="status">
+        <button type="button" data-v="soltero" aria-pressed="false">Sin pareja</button>
+        <button type="button" data-v="pareja" aria-pressed="false">En una relación</button>
+        <button type="button" data-v="complicado" aria-pressed="false">Es complicado</button>
+        <button type="button" data-v="nodigo" aria-pressed="false">Prefiero no decirlo</button></div>
+      <div><b>¿Qué te trae por aquí?</b></div>
+      <div class="opt" data-g="motive">
+        <button type="button" data-v="entender" aria-pressed="false">Entenderme mejor</button>
+        <button type="button" data-v="relacion" aria-pressed="false">Cuidar una relación</button>
+        <button type="button" data-v="curiosidad" aria-pressed="false">Pura curiosidad</button>
+        <button type="button" data-v="clase" aria-pressed="false">Vengo por Core II</button></div>
+      <button class="btn gold" type="submit" style="width:100%;font-size:18px">Entrar al juego</button>
+      <button class="btn ghost small" type="button" id="skip" style="color:var(--ink);border-color:#d9d0f0">Explorar sin registrarme</button>
+    </form></section>`;
+  app.querySelectorAll(".opt").forEach(g=>g.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;SFX.tap();
+    g.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));st[g.dataset.g]=b.dataset.v;}));
+  const enter=(skip)=>{S.profile={name:skip?"":$("#nm").value.trim(),status:skip?"nodigo":(st.status||"nodigo"),motive:skip?"curiosidad":(st.motive||"curiosidad"),since:Date.now()};save();SFX.win();go("inicio");};
+  $("#join").addEventListener("submit",e=>{e.preventDefault();enter(false);});
+  $("#skip").addEventListener("click",()=>enter(true));
+}
+
+/* ---------- Constelación ---------- */
+const POS={apego:[140,150],lenguajes:[310,80],noviazgo:[480,175],matrimonio:[660,95],sexualidad:[600,310],liquidas:[300,300]};
+const LINKS=[["apego","lenguajes"],["lenguajes","noviazgo"],["noviazgo","matrimonio"],["matrimonio","sexualidad"],["sexualidad","liquidas"],["liquidas","apego"],["noviazgo","liquidas"]];
+function constellation(){
+  let bg="";for(let i=0;i<60;i++){bg+=`<circle cx="${(i*137)%800}" cy="${(i*89)%420}" r="${(i%3)*.6+.6}" fill="#efe6ff" opacity="${.15+(i%5)*.08}"/>`;}
+  const ln=LINKS.map(([a,b])=>{const on=S.mods[a]&&S.mods[b];return `<line x1="${POS[a][0]}" y1="${POS[a][1]}" x2="${POS[b][0]}" y2="${POS[b][1]}" stroke="${on?"#ffd166":"rgba(226,214,255,.22)"}" stroke-width="${on?2.5:1.5}" stroke-dasharray="${on?"":"4 6"}"/>`;}).join("");
+  const nodes=MODS.map(m=>{const [x,y]=POS[m.id];const done=!!S.mods[m.id];
+    return `<g class="star" tabindex="0" role="link" aria-label="Módulo ${esc(m.name)}${done?" (completado)":""}" data-go="m-${m.id}">
+      <circle class="halo" cx="${x}" cy="${y}" r="38" fill="${done?m.color:"rgba(255,255,255,.04)"}" stroke="${m.color}" stroke-width="2.5" opacity="${done?1:.95}">${(!done&&!reduce)?`<animate attributeName="r" values="36;40;36" dur="3s" repeatCount="indefinite"/>`:""}</circle>
+      <g transform="translate(${x-16},${y-16})">${shape(m.shape,done?"#fff":m.color,"").replace('<svg class=""','<svg width="32" height="32"')}</g>
+      <text x="${x}" y="${y+62}" text-anchor="middle" fill="#f6f1ff" style="font:22px var(--display)">${esc(m.name)}</text>
+      ${done?`<text x="${x}" y="${y+84}" text-anchor="middle" fill="#ffd166" style="font:800 14px var(--body)">${esc(S.mods[m.id].res.title)}</text>`:`<text x="${x}" y="${y+84}" text-anchor="middle" fill="#bfb2e0" style="font:700 13px var(--body)">${m.time}</text>`}
+    </g>`;}).join("");
+  return `<div class="mapwrap"><svg viewBox="0 0 800 420" role="img" aria-label="Mapa de módulos de CoreHoot">${bg}${ln}${nodes}</svg></div>`;
+}
+function bindStars(root=app){root.querySelectorAll("[data-go]").forEach(n=>{n.addEventListener("click",()=>{SFX.tap();go(n.dataset.go);});n.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go(n.dataset.go);}});});}
+
+/* ---------- Recomendación ---------- */
+const FIRST={entender:"apego",relacion:"lenguajes",curiosidad:"liquidas",clase:"noviazgo"};
+function recommend(){
+  const undone=MODS.filter(m=>!S.mods[m.id]); if(!undone.length) return null;
+  const last=Object.entries(S.mods).sort((a,b)=>b[1].date-a[1].date)[0];
+  if(last){const n=nextFor(last[0],last[1].res);if(n&&!S.mods[n.id])return n;}
+  const f=MOD[FIRST[S.profile&&S.profile.motive]||"apego"]; return (!S.mods[f.id])?{id:f.id,why:"Es un buen punto de partida para lo que buscas."}:{id:undone[0].id,why:"Es la estrella que te falta encender."};
+}
+function nextFor(id,res){
+  const k=res&&res.key; let n=null,why="";
+  if(id==="apego"){ if(k==="A"||k==="D"){n="noviazgo";why="Tu tendencia busca mucha seguridad: afinar tu radar de relaciones sanas te va a servir.";} else if(k==="E"){n="lenguajes";why="Descubrir cómo das y recibes cariño puede ayudarte a expresarte más.";} else {n="matrimonio";why="Con una base segura, vale la pena mirar qué significa comprometerse.";} }
+  else if(id==="liquidas"){n=(k==="Vínculos sólidos")?"matrimonio":"noviazgo";why=(k==="Vínculos sólidos")?"Tus vínculos son firmes: explora el compromiso a largo plazo.":"Para contrarrestar la liquidez, nada mejor que entrenar el radar de lo sano.";}
+  else if(id==="lenguajes"){n="apego";why="Tu forma de recibir amor tiene raíces: el apego te ayuda a entenderlas.";}
+  else if(id==="noviazgo"){n="sexualidad";why="Un noviazgo sano también cuida la sexualidad con libertad y respeto.";}
+  else if(id==="matrimonio"){n="liquidas";why="Contrasta tu idea de compromiso con la cultura del “siguiente”.";}
+  else if(id==="sexualidad"){n="apego";why="Conocer tu forma de vincularte completa la mirada integral.";}
+  if(n&&S.mods[n]){const u=MODS.find(m=>!S.mods[m.id]);if(!u)return null;return {id:u.id,why:"Es la estrella que te falta encender."};}
+  return n?{id:n,why}:null;
+}
+
+/* ---------- Inicio ---------- */
+function home(){
+  setNav("inicio");
+  const done=Object.keys(S.mods).length; const rec=recommend();
+  const greet=done===0?`¡Hola, ${esc(nameOf())}! Cada estrella es un módulo. Al terminarlo se enciende y queda en tu perfil.`
+    : done<6?`¡Bienvenido/a de vuelta, ${esc(nameOf())}! Llevas ${done} de 6 estrellas encendidas.`:`¡${esc(nameOf())}, encendiste toda la constelación! Revisa tu perfil y tus compromisos.`;
+  app.innerHTML=`<div class="stack" style="gap:24px">
+    ${hoot(greet,"happy")}
+    ${rec?`<div class="card row" style="justify-content:space-between;border-color:${MOD[rec.id].color}">
+      <div class="row" style="flex-wrap:nowrap;min-width:0">${shape(MOD[rec.id].shape,MOD[rec.id].color)}<div style="min-width:0"><div class="eyebrow">Hoot te recomienda</div><h3>${esc(MOD[rec.id].name)}</h3><p class="muted small">${esc(rec.why)}</p></div></div>
+      <button class="btn gold" data-go="m-${rec.id}">Jugar ahora</button></div>`:""}
+    <div class="stack"><div class="row" style="justify-content:space-between"><h2>Tu constelación</h2><span class="chip">${done} / 6 encendidas</span></div>${constellation()}</div>
+    <div class="grid3">${MODS.map(m=>`<a class="card modcard" href="#m-${m.id}">
+      <div class="band" style="background:${m.color}"></div>
+      <div class="top">${shape(m.shape,m.color)}<h3>${esc(m.name)}</h3></div>
+      <p class="muted small">${esc(m.tag)}</p>
+      <div class="row" style="margin-top:auto">${S.mods[m.id]?`<span class="done-pill">${esc(S.mods[m.id].res.title)}</span>`:`<span class="chip">${m.time}</span>`}<span class="chip">${esc(m.authors[0])}</span></div></a>`).join("")}</div>
+    <div class="card stack"><div class="eyebrow">Cómo funciona cada módulo</div>
+      <div class="grid4">
+      ${[["Conocerse","Respondes un quiz rápido sobre ti, tus patrones y tus miedos.","var(--red)"],["Reflexionar","Ves tu resultado y escribes en tu diario.","var(--blue)"],["Comprender","Tarjetas con las ideas y autores que lo explican.","var(--yellow)"],["Decidir","Eliges un pequeño compromiso para tu vida real.","var(--green)"]].map((s,i)=>`<div class="stack" style="gap:6px"><span class="chip" style="background:${s[2]};color:${i===2?"#2a1700":"#fff"};align-self:flex-start">${i+1}. ${s[0]}</span><p class="small muted">${s[1]}</p></div>`).join("")}
+      </div></div></div>`;
+  bindStars();
+}
+
+/* ---------- Módulo ---------- */
+let R=null;
+const STEPS=["Conocerse","Reflexionar","Comprender","Decidir"];
+function stepsBar(i){return `<div class="steps">${STEPS.map((s,k)=>`<span class="${k===i?"on":k<i?"past":""}">${k+1}. ${s}</span>`).join("")}</div>`;}
+function startModule(id){
+  setNav("");
+  const m=MOD[id]; R={id,m,step:"intro",qi:0,sc:{},hits:0,total:0,missed:[],li:0,pre:"",ord:[],shuf:null};
+  const prev=S.mods[id];
+  app.innerHTML=`<div class="stage">
+    <a href="#inicio" class="small muted" style="text-decoration:none;font-weight:800">← Volver al mapa</a>
+    <div class="card stack" style="border-color:${m.color};gap:18px">
+      <div class="row">${shape(m.shape,m.color,"shape")}<span class="eyebrow" style="color:${m.color}">Módulo</span><span class="chip">${m.time}</span>${m.authors.map(a=>`<span class="chip">${esc(a)}</span>`).join("")}</div>
+      <h1>${esc(m.name)}</h1>
+      <p class="lead">${esc(m.tag)}</p>
+      ${hoot(esc(m.intro))}
+      ${prev?`<p class="small muted">Ya lo jugaste: tu resultado fue <b style="color:var(--gold)">${esc(prev.res.title)}</b>. Si lo repites, se actualiza.</p>`:""}
+      ${m.pre?`<label for="pre" class="stack" style="gap:8px"><b>${esc(m.pre)}</b><span class="small dim">“I used to think…”: al final lo vas a comparar.</span></label><textarea id="pre" placeholder="Hoy pienso que el noviazgo es…">${esc(prev&&prev.pre||"")}</textarea>`:""}
+      <div class="row"><button class="btn gold" id="start" style="font-size:18px">¡Empezar!</button><span class="small dim">${m.qs.length} preguntas · Puedes salir cuando quieras</span></div>
+    </div></div>`;
+  $("#start").addEventListener("click",()=>{if(m.pre)R.pre=$("#pre").value.trim();countdown(()=>{R.step="q";renderQ();});});
+}
+function countdown(cb){
+  if(reduce){cb();return;} const o=document.createElement("div");o.className="count";document.body.appendChild(o);
+  let n=3;const t=()=>{if(n===0){o.innerHTML="<b>¡Ya!</b>";SFX.go();setTimeout(()=>{o.remove();cb();},550);return;}o.innerHTML=`<b>${n}</b>`;SFX.tick();n--;setTimeout(t,700);};t();
+}
+function qOptions(q){
+  if(q.t==="pair") return [q.a,q.b];
+  if(q.t==="light") return [{x:"Tranquilo/a",c:"cg",w:q.w.g},{x:"Inseguro/a",c:"cy",w:q.w.y},{x:"Muy ansioso/a o molesto/a",c:"cr",w:q.w.r}];
+  if(q.t==="tf") return [{x:"Verdadero",ok:q.a===true,c:"c1"},{x:"Falso",ok:q.a===false,c:"c0"}];
+  if(q.t==="flag") return [{x:"Señal sana",ok:q.a==="sano",c:"cg"},{x:"Señal de alerta",ok:q.a==="alerta",c:"cr"}];
+  return q.o;
+}
+const isLearn=q=>q.t==="tf"||q.t==="flag"||(q.o&&q.o.some(o=>o.ok));
+function renderQ(){
+  const m=R.m,q=m.qs[R.qi],n=m.qs.length;
+  const head=`<div class="qhead">${shape(m.shape,m.color)}<b>${esc(m.name)}</b><div class="bar" aria-hidden="true"><i style="width:${R.qi/n*100}%"></i></div><span class="chip">${R.qi+1} / ${n}</span></div>${stepsBar(0)}`;
+  const kick=q.k||(q.t==="flag"?"¿Señal sana o de alerta?":q.t==="pair"?"¿Qué prefieres?":"Pregunta");
+  let body="";
+  if(q.t==="order"){
+    if(!R.shuf){R.shuf=q.items.map((x,i)=>i).sort(()=>Math.random()-.5);R.ord=[];}
+    body=`<div class="qcard"><div class="qk">${esc(kick)}</div><div class="qt">${esc(q.q)}</div></div>
+      <div class="grid2"><div class="tiles" id="ordtiles" style="grid-template-columns:minmax(0,1fr)">${R.shuf.map((i,k)=>`<button class="tile c${k%5}" data-oi="${i}" ${R.ord.includes(i)?"disabled style='opacity:.3'":""}>${shape(TILESH[k%5])}${esc(q.items[i])}</button>`).join("")}</div>
+      <div class="order-slots" id="slots">${q.items.map((_,k)=>`<div class="slot ${R.ord[k]!=null?"filled":""}"><b>${k+1}</b><span>${R.ord[k]!=null?esc(q.items[R.ord[k]]):'<span class="dim">…</span>'}</span></div>`).join("")}</div></div>
+      <div class="row"><button class="btn ghost small" id="oreset">Reiniciar</button><button class="btn gold" id="ocheck" ${R.ord.length<q.items.length?"disabled":""}>Comprobar</button></div><div id="rv"></div>`;
+  } else if(q.t==="scale"){
+    const cols=["var(--red)","var(--yellow)","var(--violet)","var(--blue)","var(--green)"];
+    body=`<div class="qcard"><div class="qk">${esc(kick)}</div><div class="qt">${pz(q.q)}</div></div>
+      <div class="stack" style="gap:10px"><div class="scale" role="group" aria-label="Del 1 al 5">${[1,2,3,4,5].map(v=>`<button data-sv="${v}" style="background:${cols[v-1]};${v===2?"color:#2a1700":""}" aria-label="${v} de 5">${v}</button>`).join("")}</div>
+      <div class="scale-l"><span>Nada</span><span>Totalmente</span></div></div>`;
+  } else {
+    const ops=qOptions(q);
+    body=`<div class="qcard"><div class="qk">${esc(kick)}</div><div class="qt">${pz(q.q)}</div></div>
+      <div class="tiles ${ops.length===3?"n3":ops.length===5?"n5":""}" id="tiles">${ops.map((o,i)=>`<button class="tile ${o.c||"c"+(i%5)}" data-i="${i}">${shape(o.c==="cg"?"cir":o.c==="cy"?"tri":o.c==="cr"?"sq":TILESH[i%5],o.c==="cy"||(!o.c&&i%5===2)?"#2a1700":"#fff")}<span>${pz(o.x)}</span></button>`).join("")}</div><div id="rv"></div>`;
+  }
+  app.innerHTML=`<div class="stage">${head}${body}</div>`;
+  if(q.t==="order") bindOrder(q); else if(q.t==="scale") app.querySelectorAll("[data-sv]").forEach(b=>b.addEventListener("click",()=>{SFX.tap();R.sc[q.d]=+b.dataset.sv;addPts(100);nextQ();}));
+  else app.querySelectorAll("#tiles .tile").forEach(b=>b.addEventListener("click",()=>pick(+b.dataset.i)));
+}
+function bindOrder(q){
+  app.querySelectorAll("[data-oi]").forEach(b=>b.addEventListener("click",()=>{SFX.tap();R.ord.push(+b.dataset.oi);renderQ();}));
+  $("#oreset").addEventListener("click",()=>{R.ord=[];renderQ();});
+  $("#ocheck").addEventListener("click",()=>{
+    const ok=R.ord.every((v,k)=>v===k); R.total++; if(ok){R.hits++;SFX.good();}else{SFX.bad();R.missed.push("El orden del proceso amoroso: disposición, flechazo, enamoramiento y amor maduro.");}
+    addPts(ok?150:100);
+    app.querySelectorAll(".slot").forEach((s,k)=>s.classList.add(R.ord[k]===k?"ok":"no"));
+    $("#ocheck").remove();$("#oreset").remove();app.querySelectorAll("[data-oi]").forEach(b=>b.disabled=true);
+    $("#rv").innerHTML=`<div class="reveal ${ok?"good":"bad"}"><div><h3>${ok?"¡Exacto!":"Casi. Así madura el amor:"}</h3><ol class="clean" style="padding-left:20px">${q.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ol><div style="margin-top:12px"><button class="btn gold" id="nx">Siguiente</button></div></div></div>`;
+    $("#nx").addEventListener("click",nextQ);$("#nx").focus();
+  });
+}
+function pick(i){
+  const q=R.m.qs[R.qi],ops=qOptions(q),o=ops[i],tl=$("#tiles");if(tl.classList.contains("answered"))return;
+  tl.classList.add("answered");tl.children[i].classList.add("picked");
+  if(isLearn(q)){
+    const ok=!!o.ok; R.total++; if(ok){R.hits++;const cat=q.t==="choice"?(R.id==="noviazgo"?"ami":"concept"):q.t;R.sc[cat]=(R.sc[cat]||0)+1;SFX.good();}else{SFX.bad();R.missed.push(q.why);}
+    const ri=ops.findIndex(x=>x.ok); tl.children[ri].classList.add("right"); tl.children[ri].insertAdjacentHTML("beforeend",`<span class="mark">✓</span>`);
+    addPts(ok?150:100);
+    $("#rv").innerHTML=`<div class="reveal ${ok?"good":"bad"}">${owl("owl",ok?"happy":"look")}<div><h3>${ok?pickOne(["¡Bien visto!","¡Exacto!","¡Radar fino!","¡Eso es!"]):pickOne(["Mmm, no exactamente","Casi","Ojo con esta"])}</h3><p>${esc(q.why)}</p><div style="margin-top:12px"><button class="btn gold" id="nx">Siguiente</button></div></div></div>`;
+    $("#nx").addEventListener("click",nextQ);$("#nx").focus();
+  } else {
+    SFX.tap(); for(const [k,v] of Object.entries(o.w||{})) R.sc[k]=(R.sc[k]||0)+v; addPts(100);
+    if(q.tip){$("#rv").innerHTML=`<div class="reveal info">${owl("owl")}<div><h3>Dato de Hoot</h3><p>${esc(q.tip)}</p><div style="margin-top:12px"><button class="btn gold" id="nx">Siguiente</button></div></div></div>`;$("#nx").addEventListener("click",nextQ);$("#nx").focus();}
+    else setTimeout(nextQ,reduce?150:650);
+  }
+}
+const pickOne=a=>a[Math.random()*a.length|0];
+function nextQ(){R.qi++;R.shuf=null;if(R.qi>=R.m.qs.length){R.step="reflect";reflect();}else renderQ();scrollTo({top:0});}
+
+function barsHTML(bars){return `<div class="bars">${bars.map(b=>`<div class="brow"><span>${esc(b.label)}</span><div class="track"><i data-w="${b.val}" style="background:${b.color}"></i></div><span>${b.val}</span></div>`).join("")}</div>`;}
+function animBars(){requestAnimationFrame(()=>setTimeout(()=>app.querySelectorAll(".track i").forEach(i=>i.style.width=i.dataset.w+"%"),60));}
+function reflect(){
+  const m=R.m; R.res=m.result(R.sc,R); const res=R.res; const prev=S.mods[m.id];
+  SFX.win();confetti();
+  app.innerHTML=`<div class="stage">${stepsBar(1)}
+    <div class="resulthero">${owl("owl bob","happy")}<div class="eyebrow">${esc(nameOf())}, tu resultado en ${esc(m.name)}</div><div class="big">${esc(res.title)}</div><p class="lead" style="text-align:center">${esc(res.summary)}</p></div>
+    <div class="grid2">
+      <div class="card stack">${barsHTML(res.bars)}<p class="small dim">${esc(res.note)}</p></div>
+      <div class="card stack">${res.html}</div>
+    </div>
+    <div class="card stack"><div class="eyebrow">Para crecer</div><ul class="clean">${res.grow.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>
+    <div class="card stack" style="border-color:var(--blue)">
+      <div class="eyebrow" style="color:#7fb2ff">Reflexionar · Tu diario</div>
+      ${m.pre&&R.pre?`<p class="small muted"><b>Al inicio escribiste:</b> “${esc(R.pre)}”</p>`:""}
+      <label for="jr"><b>${esc(m.journal)}</b></label>
+      <textarea id="jr" placeholder="Escribe con calma. Solo tú lo ves.">${esc(prev&&prev.journal||"")}</textarea>
+      <div class="row"><button class="btn small" id="savej">Guardar en mi diario</button><span class="small dim" id="jmsg"></span></div>
+      <div id="aibox" hidden class="stack" style="border-top:1px solid var(--line);padding-top:14px">
+        <div class="row">${owl("owl")}<div class="stack" style="gap:6px;flex:1;min-width:0"><b>¿Quieres que Hoot lea tu resultado?</b><p class="small muted">Hoot usa IA para escribirte una lectura personal a partir de tu resultado y tu diario.</p><div class="row"><button class="btn small gold" id="askai">Pedir lectura a Hoot</button><button class="btn ghost small" id="stopai" hidden>Detener</button></div></div></div>
+        <div class="ai" id="aiout"></div></div>
+    </div>
+    <div class="row" style="justify-content:flex-end"><button class="btn gold" id="tolearn">Comprender →</button></div></div>`;
+  animBars();
+  $("#savej").addEventListener("click",()=>{R.journal=$("#jr").value.trim();if(R.journal)addPts(50);$("#jmsg").textContent=R.journal?"Guardado. +50 ✦":"Escribe algo primero.";stash();});
+  $("#tolearn").addEventListener("click",()=>{R.journal=$("#jr").value.trim();stash();R.li=0;learn();scrollTo({top:0});});
+  setupAI();
+}
+function stash(){ // guarda resultado parcial para no perderlo
+  const m=R.m,prev=S.mods[m.id]||{};
+  S.mods[m.id]=Object.assign(prev,{res:{title:R.res.title,summary:R.res.summary,key:R.res.key},bars:R.res.bars.map(b=>[b.label,b.val]),date:Date.now(),journal:R.journal??prev.journal??"",pre:R.pre||prev.pre||""});
+  save();
+}
+function setupAI(){
+  const box=$("#aibox"); if(!SAMPLE||!box) return; box.hidden=false; let ctl=null;
+  $("#askai").addEventListener("click",async()=>{
+    const b=$("#askai"),out=$("#aiout"),st=$("#stopai"); b.disabled=true; st.hidden=false; out.textContent="Hoot está pensando…"; ctl=new AbortController();
+    const j=$("#jr").value.trim(); const m=R.m;
+    const prompt=`Eres Hoot, el búho guía de CoreHoot, una plataforma educativa del curso Persona y Afectividad (Core II) de la Universidad de La Sabana. Escribe en español de Colombia, con tono cálido, cercano y respetuoso, para ${nameOf()==="Explorador/a"?"un joven":"un joven llamado "+nameOf()}.
+Módulo: ${m.name}. Resultado: ${R.res.title}. Resumen: ${R.res.summary}
+${j?`Su reflexión escrita: "${j.slice(0,1500)}"`:"No escribió reflexión."}
+Ideas del curso para conectar: ${m.concepts}.
+Escribe una lectura personal de 110 a 150 palabras que: 1) reconozca algo valioso de su resultado, 2) lo conecte con una idea del curso nombrando al autor, 3) proponga un paso concreto para esta semana, 4) cierre con una pregunta para seguir reflexionando. No diagnostiques ni uses etiquetas clínicas, no des consejo médico y no moralices. Si su texto menciona violencia, abuso o riesgo, sugiere con suavidad hablar con alguien de confianza o con Bienestar Universitario. Responde solo con texto plano, sin títulos ni listas.`;
+    try{ const r=await SAMPLE(prompt,{signal:ctl.signal,modelTier:"quick",onText:({text})=>{out.textContent=text;}}); out.textContent=r.text; addPts(50); S.mods[m.id]=Object.assign(S.mods[m.id]||{}, {ai:r.text}); save(); }
+    catch(e){ if(e&&e.text) out.textContent=e.text; else out.textContent="";
+      if(e&&["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e.code)){box.hidden=true;}
+      else if(e&&e.code==="rate_limited") toast("Hoot necesita un respiro. Intenta en un rato.");
+      else if(e&&e.code!=="cancelled") toast("No se pudo completar la lectura. Puedes intentarlo de nuevo."); }
+    finally{ b.disabled=false; st.hidden=true; }
+  });
+  $("#stopai").addEventListener("click",()=>ctl&&ctl.abort());
+}
+function learn(){
+  const m=R.m,L=m.learn,c=L[R.li];
+  app.innerHTML=`<div class="stage">${stepsBar(2)}
+    <div class="row" style="justify-content:space-between"><h2>Comprender</h2><span class="chip">${R.li+1} / ${L.length}</span></div>
+    <div class="card lesson" style="border-color:${m.color}"><div class="n">Idea ${R.li+1}</div><h3 style="font-size:clamp(24px,3.4vw,32px)">${esc(c.h)}</h3><p>${esc(c.p)}</p><span class="src" style="margin-top:auto">Fuente: ${esc(c.s)}</span></div>
+    <div class="dots">${L.map((_,k)=>`<i class="${k===R.li?"on":""}"></i>`).join("")}</div>
+    <div class="row" style="justify-content:space-between"><button class="btn ghost" id="lp" ${R.li===0?"disabled":""}>← Anterior</button>
+      ${R.li<L.length-1?`<button class="btn gold" id="ln">Siguiente idea →</button>`:`<button class="btn gold" id="ld">Decidir →</button>`}</div></div>`;
+  $("#lp").addEventListener("click",()=>{R.li--;SFX.tap();learn();});
+  const n=$("#ln"); if(n) n.addEventListener("click",()=>{R.li++;SFX.tap();addPts(20);learn();});
+  const d=$("#ld"); if(d) d.addEventListener("click",()=>{addPts(20);decide();scrollTo({top:0});});
+}
+function decide(){
+  const m=R.m;
+  app.innerHTML=`<div class="stage">${stepsBar(3)}
+    ${hoot(`Último paso, ${esc(nameOf())}: con más claridad, ¿qué pequeña decisión vas a tomar esta semana?`)}
+    <div class="tiles" id="dtiles" style="grid-template-columns:minmax(0,1fr)">${m.decide.map((d,i)=>`<button class="tile c${i}" data-d="${i}">${shape(TILESH[i],i===2?"#2a1700":"#fff")}<span>${esc(d)}</span></button>`).join("")}</div>
+    <div class="card stack"><label for="own"><b>O escribe tu propio compromiso</b></label><input type="text" id="own" maxlength="140" placeholder="Esta semana voy a…"><div><button class="btn small" id="ownb">Usar mi compromiso</button></div></div></div>`;
+  app.querySelectorAll("[data-d]").forEach(b=>b.addEventListener("click",()=>finish(m.decide[+b.dataset.d])));
+  $("#ownb").addEventListener("click",()=>{const v=$("#own").value.trim();if(!v){toast("Escribe tu compromiso o elige uno.");return;}finish(v);});
+}
+function finish(text){
+  const m=R.m; stash(); S.mods[m.id].decision=text;
+  S.commits=S.commits.filter(c=>c.id!==m.id); S.commits.push({id:m.id,text,done:false,date:Date.now()});
+  addPts(500); save(); SFX.win(); confetti();
+  const nx=nextFor(m.id,R.res)||recommend(); const total=Object.keys(S.mods).length;
+  const share=`Acabo de jugar el módulo ${m.name} en CoreHoot. Mi resultado: ${R.res.title}. Mi compromiso: ${text}. Conócete. Reflexiona. Ama mejor.`;
+  app.innerHTML=`<div class="stage" style="align-items:center;text-align:center">
+    <svg class="badge" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="54" fill="${m.color}" stroke="#ffd166" stroke-width="6"/><g transform="translate(36,36) scale(1.5)">${shape(m.shape,"#fff","").replace('<svg class=""','<svg width="32" height="32"')}</g></svg>
+    <div class="eyebrow">Estrella encendida · ${total} de 6</div>
+    <h1>${esc(m.name)}</h1>
+    <p class="lead" style="text-align:center">Tu compromiso: <b style="color:var(--fg)">${esc(text)}</b></p>
+    <div class="row" style="justify-content:center"><span class="pts">+500 ✦</span><span class="chip">Total ✦ ${S.points.toLocaleString("es-CO")}</span></div>
+    ${nx?`<div class="card stack" style="max-width:560px;width:100%;text-align:left;border-color:${MOD[nx.id].color}"><div class="eyebrow">Siguiente estrella</div><div class="row" style="flex-wrap:nowrap">${shape(MOD[nx.id].shape,MOD[nx.id].color)}<h3>${esc(MOD[nx.id].name)}</h3></div><p class="muted small">${esc(nx.why)}</p><div><button class="btn gold" data-go="m-${nx.id}">Jugar ${esc(MOD[nx.id].name)}</button></div></div>`:`<div class="card" style="max-width:560px">${hoot("¡Encendiste las seis estrellas! Revisa tu perfil completo.","happy")}</div>`}
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="shr">Compartir mi aprendizaje</button><a class="btn ghost" href="#perfil">Ver mi perfil</a><a class="btn ghost" href="#inicio">Volver al mapa</a></div>
+    <textarea id="copybox" hidden readonly style="max-width:560px"></textarea>
+    <p class="small dim" style="max-width:52ch">Al compartir solo se copia tu resultado y tu compromiso, nunca tu diario.</p></div>`;
+  bindStars(); $("#shr").addEventListener("click",()=>copyText(share));
+}
+
+/* ---------- Perfil ---------- */
+function profile(){
+  setNav("perfil");
+  const done=MODS.filter(m=>S.mods[m.id]); const cm=S.commits.filter(c=>c.done).length;
+  const share=`Mi constelación CoreHoot (${done.length}/6): `+done.map(m=>`${m.name}: ${S.mods[m.id].res.title}`).join(" · ")+". Conócete. Reflexiona. Ama mejor.";
+  app.innerHTML=`<div class="stack" style="gap:24px">
+    <div class="row" style="gap:18px">${owl("owl bob","happy")}<div class="stack" style="gap:4px;min-width:0"><div class="eyebrow">Mi CoreHoot</div><h1>${esc(nameOf())}</h1><div class="row"><span class="pts">✦ ${(S.points||0).toLocaleString("es-CO")}</span><span class="chip">${done.length} / 6 módulos</span><span class="chip">${cm} / ${S.commits.length} compromisos cumplidos</span></div></div></div>
+    ${constellation()}
+    <section class="stack"><h2>Mis resultados</h2>${done.length?`<div class="grid3">${done.map(m=>{const d=S.mods[m.id];return `<div class="card stack" style="border-top:5px solid ${m.color}"><div class="row">${shape(m.shape,m.color)}<b>${esc(m.name)}</b></div><h3 style="color:var(--gold)">${esc(d.res.title)}</h3><p class="small muted">${esc(d.res.summary)}</p>${d.ai?`<details><summary class="small" style="cursor:pointer;font-weight:800">Lectura de Hoot</summary><p class="small ai" style="margin-top:8px">${esc(d.ai)}</p></details>`:""}<a class="small" style="color:var(--gold);font-weight:800" href="#m-${m.id}">Repetir módulo</a></div>`;}).join("")}</div>`:`<div class="card">${hoot("Todavía no has encendido ninguna estrella. ¡Empieza por un módulo del mapa!")}</div>`}</section>
+    <section class="card stack"><h2>Mis compromisos</h2><p class="small muted">Marca los que ya cumpliste. Decidir es la última parte del ciclo.</p>
+      ${S.commits.length?S.commits.map((c,i)=>`<label class="check ${c.done?"donec":""}"><input type="checkbox" id="cm${i}" data-ci="${i}" ${c.done?"checked":""}><span><b>${esc(MOD[c.id]?MOD[c.id].name:"")}</b>: ${esc(c.text)}</span></label>`).join(""):`<p class="dim">Aquí aparecerán los compromisos que elijas al final de cada módulo.</p>`}</section>
+    <section class="card stack"><h2>Mi diario</h2>
+      ${done.filter(m=>S.mods[m.id].journal||S.mods[m.id].pre).length?done.filter(m=>S.mods[m.id].journal||S.mods[m.id].pre).map(m=>{const d=S.mods[m.id];return `<div class="stack" style="gap:6px;border-left:3px solid ${m.color};padding-left:12px"><b>${esc(m.name)}</b>${d.pre?`<p class="small muted"><b>I used to think:</b> ${esc(d.pre)}</p>`:""}${d.journal?`<p class="small">${esc(d.journal)}</p>`:""}</div>`;}).join(""):`<p class="dim">Las reflexiones que escribas en cada módulo se guardan aquí.</p>`}</section>
+    <section class="card stack" style="border-color:var(--gold)"><div class="eyebrow">Actividad especial</div><h2>Carta 2036: escríbete desde el futuro</h2>
+      <p class="muted">Han pasado más de diez años. Escríbele a alguien muy cercano: en qué te has convertido, qué metas lograste y qué aprendiste, cómo evolucionó tu vida profesional y qué ocurrió con tu vida afectiva y tus relaciones más significativas. No hables solo de éxitos: habla de transformación.</p>
+      <textarea id="carta" style="min-height:180px" placeholder="Querido/a…">${esc(S.carta)}</textarea><div class="row"><button class="btn small" id="savecarta">Guardar carta</button><span class="small dim" id="cmsg"></span></div></section>
+    <section class="grid2">
+      <div class="card stack"><h3>Compartir sin exponerte</h3><p class="small muted">Copia un resumen de tus resultados. Nunca incluye tu diario ni tu carta.</p><div><button class="btn small" id="shr">Copiar resumen</button></div><textarea id="copybox" hidden readonly></textarea></div>
+      <div class="card stack"><h3>¿Te sirvió CoreHoot?</h3><div class="stars5" role="group" aria-label="Calificación">${[1,2,3,4,5].map(v=>`<button data-st="${v}" class="${v<=S.feedback.stars?"on":""}" aria-label="${v} de 5">★</button>`).join("")}</div>
+        <textarea id="fb" style="min-height:80px" placeholder="¿Qué aprendiste? ¿Qué mejorarías?">${esc(S.feedback.text)}</textarea>
+        <div class="row"><button class="btn small" id="fbcopy">Copiar mi opinión para el equipo</button></div><p class="small dim">Pégala en el grupo o formulario que te comparta el equipo CoreHoot.</p></div></section>
+    <section class="card stack"><h3>Ajustes</h3>
+      <div class="row"><label for="nm2" class="small"><b>Mi apodo</b></label><input type="text" id="nm2" maxlength="24" value="${esc(S.profile.name)}" style="max-width:240px"><button class="btn small ghost" id="savenm">Guardar</button></div>
+      <div class="row"><span class="small"><b>Momento:</b></span>${[["soltero","Sin pareja"],["pareja","En una relación"],["complicado","Es complicado"],["nodigo","Prefiero no decirlo"]].map(([v,l])=>`<button class="btn small ${S.profile.status===v?"":"ghost"}" data-stt="${v}">${l}</button>`).join("")}</div>
+      <div class="row" id="resetrow"><button class="btn small ghost" id="reset">Borrar mis datos de este dispositivo</button></div></section></div>`;
+  bindStars();
+  app.querySelectorAll("[data-ci]").forEach(c=>c.addEventListener("change",()=>{const it=S.commits[+c.dataset.ci];it.done=c.checked;if(c.checked){addPts(200);SFX.good();toast("¡Compromiso cumplido! +200 ✦");}save();c.closest(".check").classList.toggle("donec",c.checked);}));
+  $("#savecarta").addEventListener("click",()=>{const had=!!S.carta;S.carta=$("#carta").value.trim();if(S.carta&&!had)addPts(300);save();$("#cmsg").textContent=S.carta?"Carta guardada.":"Escribe tu carta primero.";});
+  $("#shr").addEventListener("click",()=>copyText(share));
+  app.querySelectorAll("[data-st]").forEach(b=>b.addEventListener("click",()=>{S.feedback.stars=+b.dataset.st;save();app.querySelectorAll("[data-st]").forEach(x=>x.classList.toggle("on",+x.dataset.st<=S.feedback.stars));}));
+  $("#fb").addEventListener("input",e=>{S.feedback.text=e.target.value;save();});
+  $("#fbcopy").addEventListener("click",()=>copyText(`Opinión CoreHoot: ${S.feedback.stars||"-"}/5 estrellas. Módulos jugados: ${done.length}/6. Comentario: ${S.feedback.text||"(sin comentario)"}`));
+  $("#savenm").addEventListener("click",()=>{S.profile.name=$("#nm2").value.trim();save();profile();toast("Apodo actualizado.");});
+  app.querySelectorAll("[data-stt]").forEach(b=>b.addEventListener("click",()=>{S.profile.status=b.dataset.stt;save();profile();}));
+  $("#reset").addEventListener("click",()=>{$("#resetrow").innerHTML=`<span class="small"><b>¿Seguro?</b> Se borran tus resultados, diario, carta y puntos.</span><button class="btn small" id="yes" style="background:var(--red);color:#fff">Sí, borrar todo</button><button class="btn small ghost" id="no">Cancelar</button>`;
+    $("#yes").addEventListener("click",()=>{S=DEF();save();try{localStorage.removeItem(KEY);}catch(e){}go("inicio");});$("#no").addEventListener("click",profile);});
+}
+
+/* ---------- Sobre el proyecto ---------- */
+function project(){
+  setNav("proyecto");
+  const team=[["Mariana Borda","Desarrollo web"],["Mariangel Villanueva","Desarrollo web"],["Sharon Ariza","Diseño"],["Mariana Chaparro","Diseño"],["Simón García","Investigación y contenido"],["Sara Cifuentes","Investigación y contenido"]];
+  const allRefs=[...new Set(MODS.flatMap(m=>m.refs))].map(k=>REFS[k]).sort((a,b)=>a.localeCompare(b,"es"));
+  app.innerHTML=`<div class="stack" style="gap:28px">
+    <div class="stack"><div class="eyebrow">Sobre el proyecto · Core II, Persona y Afectividad</div><h1>¿Y si para entender mejor nuestras relaciones primero necesitamos entendernos a nosotros mismos?</h1>
+      <p class="lead">CoreHoot es una plataforma web de cuestionarios interactivos que ayuda a los jóvenes a comprender mejor sus relaciones afectivas a través del autoconocimiento y la reflexión.</p>
+      ${S.profile?"":`<div><a class="btn gold" href="#inicio">Empezar a jugar</a></div>`}</div>
+    <div class="grid2">
+      <div class="card stack"><div class="eyebrow">El problema</div><h3>¿Cómo podemos ayudar a los jóvenes a construir relaciones afectivas más conscientes y saludables en un contexto de desconexión emocional digital?</h3>
+        <p class="muted">Estamos muy conectados por la tecnología, pero eso no siempre significa una conexión emocional real. Aparecen el FOMO, el FOBO, la idealización, la gratificación inmediata y las relaciones líquidas. La raíz: falta autoconocimiento y reflexión sobre cómo construimos nuestras relaciones.</p></div>
+      <div class="card stack"><div class="eyebrow">La visión</div><h3>Una generación que se conozca mejor</h3>
+        <p class="muted">Jóvenes autoconscientes, reflexivos y autónomos, con mayor educación emocional. Noviazgos saludables, relaciones con apego seguro, vínculos conscientes y relaciones con compromiso y propósito.</p></div></div>
+    <div class="card stack"><div class="eyebrow">Árbol de problemas</div>
+      <div class="grid3">
+        <div class="stack" style="gap:6px"><b>Causas</b><ul class="clean small muted"><li>Falta de educación afectiva</li><li>Poco autoconocimiento</li><li>Influencia de redes sociales</li><li>FOMO y FOBO</li><li>Búsqueda de gratificación inmediata</li><li>Idealización del amor</li><li>Baja tolerancia a la frustración</li></ul></div>
+        <div class="stack" style="gap:6px;align-items:center;justify-content:center;text-align:center"><span class="chip" style="background:var(--gold);color:var(--ink)">Problema central</span><h3>Dificultad para construir relaciones afectivas profundas y conscientes</h3></div>
+        <div class="stack" style="gap:6px"><b>Efectos</b><ul class="clean small muted"><li>Relaciones inestables</li><li>Miedo al compromiso</li><li>Dificultad para establecer límites</li><li>Desapego emocional</li><li>Confusión emocional</li><li>Dependencia o evitación emocional</li><li>Dificultad para construir vínculos duraderos</li></ul></div></div></div>
+    <div class="card stack"><div class="eyebrow">Por qué funciona</div><h3>Conocerse → Reflexionar → Comprender → Decidir</h3>
+      <p class="muted">Cada módulo convierte conceptos del curso en una experiencia de descubrimiento, no de evaluación. Combina lo digital con la reflexión personal para que el usuario piense sobre sí mismo y no solo busque validación o comparación en redes.</p>
+      <div class="tablewrap"><table class="ref"><thead><tr><th>Módulo</th><th>Mecánica</th><th>Sustento</th></tr></thead><tbody>
+        <tr><td>Apego</td><td>Semáforo emocional y escenarios</td><td>Bowlby (1969); Waldinger (2015)</td></tr>
+        <tr><td>Lenguajes del amor</td><td>Elecciones en pares y cómo das cariño</td><td>Chapman (2011); Yepes y Aranguren (2003)</td></tr>
+        <tr><td>Noviazgos saludables</td><td>Verdadero o falso, señales sanas o de alerta, tipos de amistad</td><td>Conen (2017); Rojas (2013); Aristóteles (1985)</td></tr>
+        <tr><td>Matrimonio</td><td>Ordenar el proceso amoroso, identificar actos del amor, Carta 2036</td><td>Yepes y Aranguren (2003); Aristóteles (1985)</td></tr>
+        <tr><td>Sexualidad</td><td>Dimensiones de la persona, consentimiento y brújula de autocuidado</td><td>Yepes y Aranguren (2003); Conen (2017)</td></tr>
+        <tr><td>Relaciones líquidas</td><td>Simulación de escenas del celular con medidores</td><td>Bauman (2005); McGinnis (2020); Rojas (1992); Han (2012); Turkle (2017); Illouz (2012)</td></tr>
+      </tbody></table></div></div>
+    <div class="grid2">
+      <div class="card stack"><div class="eyebrow">Para quién</div><ul class="clean muted"><li>Jóvenes de 16 a 26 años.</li><li>Personas interesadas en autoconocimiento, relaciones conscientes y bienestar emocional.</li><li>Cualquier dispositivo con internet: computador o celular.</li></ul>
+        <div class="eyebrow" style="margin-top:8px">Privacidad</div><p class="small muted">No hay cuentas ni servidores: las respuestas se guardan solo en el navegador de cada persona. Compartir nunca incluye el diario.</p></div>
+      <div class="card stack"><div class="eyebrow">Equipo</div>${team.map(t=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px"><b>${t[0]}</b><span class="small muted">${t[1]}</span></div>`).join("")}<p class="small dim">Proyecto Core II · Persona y Afectividad · Universidad de La Sabana · Instituto de La Familia</p></div></div>
+    <div class="card stack refs"><div class="eyebrow">Referencias (APA 7.ª edición)</div>${allRefs.map(r=>`<p>${r}</p>`).join("")}</div></div>`;
+}
+
+/* ---------- Arranque ---------- */
+$("#snd").addEventListener("click",()=>{S.sound=!S.sound;save();updSnd();if(S.sound)SFX.good();});
+function updSnd(){const b=$("#snd");b.setAttribute("aria-pressed",S.sound);b.setAttribute("aria-label",S.sound?"Silenciar sonidos":"Activar sonidos");b.innerHTML=S.sound?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';}
+updSnd();
+route();
+(async()=>{try{if(window.claude&&claude.use){SAMPLE=await claude.use("sample");if(SAMPLE&&R&&R.step==="reflect")setupAI();}}catch(e){SAMPLE=null;}})();
+
+</script>
+</body>
+</html>
